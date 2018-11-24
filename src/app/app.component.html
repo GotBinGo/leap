@@ -1,33 +1,47 @@
 <mat-drawer-container hasBackdrop="false" class="main-container">
-    <mat-drawer #drawer mode="over" position="end" opened class="sidebar">
-      <div class="h-100 d-flex justify-content-between flex-column">
-        <div class="dalign-self-start row">
-          <button class="col-1" mat-button (click)="drawer.toggle()">
-              <mat-icon>menu</mat-icon>
-          </button>
-        </div>
-        <div class="row">
-          <div class="col-10">
-            <form>
-                <mat-form-field class="w-100">
-                  <input matInput placeholder="" value="">
-                </mat-form-field>
-            </form>
-          </div>
-          <div class="col-1 pr-0 pl-0">
-            <button mat-button class="send pl-0 pr-0 mt-3">
-              <mat-icon >send</mat-icon>
-            </button>
-          </div>
-        </div>
-      </div>
-    </mat-drawer>
-    <mat-drawer-content class="main">
-      <div class="row">
-        <button class="menu-fixed d-flex justify-content-center" mat-button (click)="drawer.toggle()">
-          <mat-icon>menu</mat-icon>
+  <mat-drawer #drawer mode="over" position="end" opened class="sidebar">
+    <div class="h-100 d-flex justify-content-between flex-column ot">
+      <div class="row mb-2">
+        <button class="col-1 h-100 mb-2" mat-button (click)="drawer.toggle()">
+          <mat-icon class="">menu</mat-icon>
         </button>
       </div>
-    </mat-drawer-content>
-  </mat-drawer-container>
-  
+      <div class="row d-flex flex-grow-1 flex-column">
+        <div class="texts d-flex flex-grow-1 flex-column">
+          <div class="col-12 mb-2 d-flex justify-content-end" *ngFor="let item of [1,323,2,323,2,323,2,323,2,323,2,323,2,323,2,323,2,323,2,323,2,323,2,323,2,323,2,3]">
+            <mat-chip-list>
+              <mat-chip color="primary" selected>Dal</mat-chip>
+            </mat-chip-list>
+          </div>
+          <div class="col-12">
+            <mat-chip-list>
+              <mat-chip>Dal</mat-chip>
+            </mat-chip-list>
+          </div>
+        </div>
+      </div>
+      <div class="red"></div>
+      <div class="row send-bar">
+        <div class="col-10">
+          <form>
+            <mat-form-field class="w-100">
+              <input matInput value="">
+            </mat-form-field>
+          </form>
+        </div>
+        <div class="col-1 pr-0 pl-0">
+          <button mat-button class="send pl-0 pr-0 mt-3">
+            <mat-icon>send</mat-icon>
+          </button>
+        </div>
+      </div>
+    </div>
+  </mat-drawer>
+  <mat-drawer-content class="main">
+    <div class="row">
+      <button class="menu-fixed d-flex justify-content-center" mat-button (click)="drawer.toggle()">
+        <mat-icon>menu</mat-icon>
+      </button>
+    </div>
+  </mat-drawer-content>
+</mat-drawer-container>

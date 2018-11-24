@@ -20,6 +20,25 @@
     margin-left: -10px;
 }
 
-.main {
-    background: red;
+.red {
+    height: 1px;
+    background: lightgray;
+    margin-bottom:-6px;
+}
+
+.blue {
+    background: blue;
+}
+
+.texts {
+    overflow: auto;
+    
+}
+
+.ot {
+    overflow: hidden;
+}
+
+.send-bar {
+    margin-bottom: 10px;
 }
