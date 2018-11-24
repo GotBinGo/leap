@@ -6,5 +6,5 @@ import { Component } from '@angular/core';
   styleUrls: ['./app.component.css']
 })
 export class AppComponent {
-  title = 'sd';
+  messages = [{message: 'a', self: true}, {message: 'b', self: false}, {message: 'c', self: true}];
 }
