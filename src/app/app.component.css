@@ -4,8 +4,22 @@
 }
 
 .sidebar {
-    width: 20%;
+    min-width: 350px;
 }
+
 .inner {
     height: 100%;
+}
+
+.menu-fixed {
+    position: fixed;
+    right:0px
+}
+
+.send {
+    margin-left: -10px;
+}
+
+.main {
+    background: red;
 }

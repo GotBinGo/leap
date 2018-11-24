@@ -1,14 +1,32 @@
-<mat-drawer-container class="main-container">
-    <mat-drawer mode="side" position="end" opened class="sidebar">
-      <div class="d-flex align-items-end inner">
-        i like this
+<mat-drawer-container hasBackdrop="false" class="main-container">
+    <mat-drawer #drawer mode="over" position="end" opened class="sidebar">
+      <div class="h-100 d-flex justify-content-between flex-column">
+        <div class="dalign-self-start row">
+          <button class="col-1" mat-button (click)="drawer.toggle()">
+              <mat-icon>menu</mat-icon>
+          </button>
+        </div>
+        <div class="row">
+          <div class="col-10">
+            <form>
+                <mat-form-field class="w-100">
+                  <input matInput placeholder="" value="">
+                </mat-form-field>
+            </form>
+          </div>
+          <div class="col-1 pr-0 pl-0">
+            <button mat-button class="send pl-0 pr-0 mt-3">
+              <mat-icon >send</mat-icon>
+            </button>
+          </div>
+        </div>
       </div>
     </mat-drawer>
-    <mat-drawer-content>
+    <mat-drawer-content class="main">
       <div class="row">
-          <mat-card class="col-6 d-flex justify-content-center">
-            <button mat-button>Click me!</button>
-          </mat-card>
+        <button class="menu-fixed d-flex justify-content-center" mat-button (click)="drawer.toggle()">
+          <mat-icon>menu</mat-icon>
+        </button>
       </div>
     </mat-drawer-content>
   </mat-drawer-container>
