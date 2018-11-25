@@ -7,10 +7,10 @@
         </button>
       </div>
       <div class="d-flex flex-grow-1 flex-column h-100">
-        <div class="texts d-flex flex-grow-1 flex-column tt">
+        <div class="texts d-flex flex-grow-1 flex-column tt" id="scroll">
           <div class="row sidebar">
-          <div class="col-12 mt-2 d-flex" [class.justify-content-end]="item.self" *ngFor="let item of messages">
-            <mat-chip-list>
+          <div class="col-12 mt-1 d-flex" [class.justify-content-start]="!item.self" [class.justify-content-end]="item.self" *ngFor="let item of messages">
+            <mat-chip-list class="mr-2">
               <mat-chip color="primary" [selected]="item.self">{{item.message}}</mat-chip>
             </mat-chip-list>
           </div>
@@ -22,12 +22,12 @@
         <div class="col-10">
           <form>
             <mat-form-field class="w-100">
-              <input matInput value="">
+              <input matInput name="ch" id="d" (keyup.enter)="send()" [(ngModel)]="chatInput">
             </mat-form-field>
           </form>
         </div>
         <div class="col-1 pr-0 pl-0">
-          <button mat-button class="send pl-0 pr-0 mt-3">
+          <button mat-button (click)="send()" class="send pl-0 pr-0 mt-3">
             <mat-icon>send</mat-icon>
           </button>
         </div>
