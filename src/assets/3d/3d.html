@@ -393,10 +393,10 @@
                 // scene.add( pointLight2 );
                 pointLight = createLight( 0xff0000, boxMesh);
                 light = pointLight
-                //scene.add( light );
+                scene.add( light );
                 pointLight = createLight( 0x0000ff, boxMesh);
                 light2 = pointLight
-                //scene.add( light2 );
+                scene.add( light2 );
 
 
                 var geometry = new THREE.BoxGeometry( 1, 1, 1 );
@@ -442,8 +442,8 @@ return pointLight;
                     //light.position.set((xx-800)/30, 1.2, (yy+600)/30);
                     boxMeshes[i].position.set(110, 0, 0);
                     cube.position.set(-20, 3+Math.sin(Date.now()/1000)*3, -30);
-                    light.position.set(-20-Math.sin(Date.now()/1000)*15, 1, -30-Math.cos(Date.now()/1000)*15)
-                    light2.position.set(-20+Math.sin(Date.now()/1000)*15, 1, -30+Math.cos(Date.now()/1000)*15)
+                    light.position.set(-20-Math.sin(Date.now()/1000)*5, 1, -30-Math.cos(Date.now()/1000)*5)
+                    light2.position.set(-20+Math.sin(Date.now()/1000)*5, 1, -30+Math.cos(Date.now()/1000)*5)
                     // console.log(Date.now()-last) //FPS
                     last = Date.now();
                 }

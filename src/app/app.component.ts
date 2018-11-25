@@ -6,7 +6,7 @@ import { Component } from '@angular/core';
   styleUrls: ['./app.component.css']
 })
 export class AppComponent {
-  messages = [{message: 'a', self: true}, {message: 'b', sender: 'Toomi', self: false}, {message: 'c', self: false, sender: 'Toomi'}, {message: 'c', self: true}, {message: 'c', self: true}, {message: 'c', self: true}, {message: 'c', self: true}, {message: 'c', self: true}, {message: 'c', self: true}, {message: 'c', self: true}, {message: 'c', self: true}, {message: 'c', self: true}, {message: 'c', self: true}, {message: 'c', self: true}, {message: 'c', self: true}, {message: 'c', self: true}, {message: 'c', self: true}, {message: 'c', self: true}, {message: 'c', self: true}, {message: 'c', self: true}, {message: 'c', self: true}, {message: 'c', self: true}, {message: 'c', self: true}, {message: 'c', self: true}, {message: 'c', self: true}, {message: 'c', self: true}, {message: 'c', self: true}];
+  messages = [];
   chatInput = '';
   send = () => {
     this.messages.push({message: this.chatInput, self: this.chatInput.length % 2 === 0, sender: 'Toomi'});
