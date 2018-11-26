@@ -1,78 +1,4 @@
-<!DOCTYPE html>
-<html>
-    <head>
-        <meta charset="utf-8">
-        <title>cannon.js + three.js physics shooter</title>
-        <style>
-            html, body {
-                width: 100%;
-                height: 100%;
-            }
-
-            body {
-                background-color: #ffffff;
-                margin: 0;
-                overflow: hidden;
-                font-family: arial;
-            }
-
-            #blocker {
-
-                position: absolute;
-
-                width: 100%;
-                height: 100%;
-
-                background-color: rgba(0,0,0,0.0);
-
-            }
-
-            #instructions {
-
-                width: 100%;
-                height: 100%;
-
-                display: -webkit-box;
-                display: -moz-box;
-                display: box;
-
-                -webkit-box-orient: horizontal;
-                -moz-box-orient: horizontal;
-                box-orient: horizontal;
-
-                -webkit-box-pack: center;
-                -moz-box-pack: center;
-                box-pack: center;
-
-                -webkit-box-align: center;
-                -moz-box-align: center;
-                box-align: center;
-
-                color: #ffffff;
-                text-align: center;
-
-                cursor: pointer;
-
-            }
-
-        </style>
-    </head>
-    <body>
-            <script src="https://threejs.org/build/three.js"></script>
-            <!-- <script src="Three.js"></script> -->
-
-        <div id="blocker">
-
-            <div id="instructions">
-                <span style="font-size:40px">Click to play</span>
-                <br />
-                (W,A,S,D = Move, SPACE = Jump, MOUSE = Look, CLICK = Shoot)
-            </div>
-
-        </div>
-
-        <script>
-
+window.setTimeout(xxxx => {
 
 		var wsImpl = window.WebSocket || window.MozWebSocket;
 		window.ws = new wsImpl('ws://'+'localhost'+':8080/');
@@ -355,13 +281,13 @@
                 renderer.shadowMapSoft = true;
                 renderer.setSize( window.innerWidth, window.innerHeight );
                 //renderer.setClearColor( scene.fog.color, 1 );
-
-                document.body.appendChild( renderer.domElement );
+                var cand = document.getElementById( 'cand' );
+                cand.appendChild( renderer.domElement );
 
                 window.addEventListener( 'resize', onWindowResize, false );
 
                 material = new THREE.MeshBasicMaterial( { color: 0xff0000 } );
-                var boxGeometry = new THREE.SphereBufferGeometry( 1.2, 32, 32 )
+                var boxGeometry = new THREE.SphereBufferGeometry( 1.2, 3, 3 )
                 for(var i=0; i<1; i++){
                     var x = -10;
                     var y = 1;
@@ -373,11 +299,6 @@
                     //boxMesh.castShadow = true;
                     //boxMesh.receiveShadow = true;
                     boxMeshes.push(boxMesh);
-                    var distanceMaterial = new THREE.MeshDistanceMaterial( {
-						alphaMap: material.alphaMap,
-						alphaTest: material.alphaTest
-					} );
-                    boxMesh.customDistanceMaterial = distanceMaterial;
 
                 //scene.add(boxMesh);
                 // pointLight2 = createLight( 0x0000ff, boxMesh);
@@ -394,16 +315,29 @@
                 // scene.add( pointLight2 );
                 pointLight = createLight( 0xff0000, boxMesh);
                 light = pointLight
-                scene.add( light );
+                //scene.add( light );
                 pointLight = createLight( 0x0000ff, boxMesh);
                 light2 = pointLight
-                scene.add( light2 );
+                //scene.add( light2 );
+                light.position.set(-20, 1, -10)
+                light2.position.set(-20, 1, -30)
 
+                light = new THREE.PointLight( 0xff0000, 1, 100 );
+                light.position.set(-20, 1, -10)
+                scene.add( light );
+
+                light2 = new THREE.PointLight( 0x0000ff, 1, 100 );
+                light2.position.set(-20, 1, -30)
+                scene.add( light2 );
+                light.castShadow = true;     
+                light2.castShadow = true;     
 
                 var geometry = new THREE.BoxGeometry( 1, 1, 1 );
-                var material = new THREE.MeshPhongMaterial( {color: 0xff0000} );
+                var material = new THREE.MeshPhongMaterial( {color: 0x444444} );
                 cube = new THREE.Mesh( geometry, material );
                 cube.position.set(-20, 1, -30)
+                cube.castShadow = false;
+                cube.receiveShadow = false;
                 scene.add( cube );
                 }
 
@@ -418,7 +352,7 @@ pointLight.shadow.camera.far = 50;
 pointLight.shadowCameraFov = 90;
 pointLight.shadow.bias = - 0.5; // reduces self-shadowing on double-sided objects
 
-var geometry = new THREE.SphereBufferGeometry( 0.3, 12, 6 );
+var geometry = new THREE.SphereBufferGeometry( 0.3, 3, 3 );
 var material = new THREE.MeshBasicMaterial( { color: color } );
 material.color.multiplyScalar( intensity );
 var sphere = new THREE.Mesh( geometry, material );
@@ -435,7 +369,6 @@ return pointLight;
                 camera.updateProjectionMatrix();
                 renderer.setSize( window.innerWidth, window.innerHeight );
             }
-
             function animate() {
                 requestAnimationFrame( animate );
                 for(var i=0; i<boxMeshes.length; i++){
@@ -445,7 +378,6 @@ return pointLight;
                     cube.position.set(-20, 3+Math.sin(Date.now()/1000)*3, -30);
                     light.position.set(-20-Math.sin(Date.now()/1000)*5, 1, -30-Math.cos(Date.now()/1000)*5)
                     light2.position.set(-20+Math.sin(Date.now()/1000)*5, 1, -30+Math.cos(Date.now()/1000)*5)
-
                     if(FPS.length > 100)
                         FPS.shift();
                     FPS.push(Date.now()-last)
@@ -473,7 +405,5 @@ return pointLight;
                 yawObject.position.set(posx, 5, posz);
 
             };
-
-        </script>
-    </body>
-</html>
+            console.log('tmi')
+        }, 1000);

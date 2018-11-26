@@ -1,5 +1,5 @@
 <mat-drawer-container hasBackdrop="false" class="main-container">
-  <mat-drawer #drawer mode="over" position="end" opened class="sidebar">
+  <mat-drawer #drawer mode="side" position="end" opened class="sidebar">
     <div class="h-100 d-flex justify-content-between flex-column ot">
       <div class="row mb-2">
         <button class="col-1 h-100" mat-button (click)="drawer.toggle()">
@@ -36,11 +36,13 @@
     </div>
   </mat-drawer>
   <mat-drawer-content class="main">
-    <div class="row">
-      <button class="menu-fixed d-flex justify-content-center bg-white" mat-button (click)="drawer.toggle()">
+    <div id="cand">
+      <app-game></app-game>
+    </div>
+      <button class="menu-fixed d-flex justify-content-center bg-white cmenu" mat-button (click)="drawer.toggle()">
         <mat-icon>menu</mat-icon>
       </button>
-    </div>
-    <iframe frameBorder="0" src="assets/3d/3d.html" class="frame"></iframe>
+    <!-- <iframe frameBorder="0" src="assets/3d/3d.html" class="frame"></iframe> -->
+    
   </mat-drawer-content>
 </mat-drawer-container>
