@@ -329,11 +329,10 @@ window.setTimeout(xxxx => {
                 light2 = new THREE.PointLight( 0x0000ff, 1, 100 );
                 light2.position.set(-20, 1, -30)
                 scene.add( light2 );
-                light.castShadow = true;     
-                light2.castShadow = true;     
 
-                var geometry = new THREE.BoxGeometry( 1, 1, 1 );
-                var material = new THREE.MeshPhongMaterial( {color: 0x444444} );
+
+                var geometry = new THREE.BoxGeometry( 0.1, 1, 40 );
+                var material = new THREE.MeshPhongMaterial( {color: 0x333333} );
                 cube = new THREE.Mesh( geometry, material );
                 cube.position.set(-20, 1, -30)
                 cube.castShadow = false;
@@ -375,14 +374,17 @@ return pointLight;
                     var y = 6+Math.sin(Date.now()/100)*5;
                     //light.position.set((xx-800)/30, 1.2, (yy+600)/30);
                     boxMeshes[i].position.set(110, 0, 0);
-                    cube.position.set(-20, 3+Math.sin(Date.now()/1000)*3, -30);
+                    //cube.position.set(-20, 3+Math.sin(Date.now()/1000)*3, -30);
                     light.position.set(-20-Math.sin(Date.now()/1000)*5, 1, -30-Math.cos(Date.now()/1000)*5)
                     light2.position.set(-20+Math.sin(Date.now()/1000)*5, 1, -30+Math.cos(Date.now()/1000)*5)
-                    if(FPS.length > 100)
-                        FPS.shift();
-                    FPS.push(Date.now()-last)
-                    console.log(FPS.reduce((a, b) => a + b, 0), Date.now()-last) //FPS
-                    last = Date.now();
+                    if(Date.now()-last > 1000)
+                    {
+                        last = Date.now();
+                        console.log(FPS.length) //FPS
+                        FPS = []
+                    }
+                    FPS.push(1);
+
                 }
 
                 update( Date.now() - time );
