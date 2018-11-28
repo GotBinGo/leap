@@ -36,13 +36,10 @@
     </div>
   </mat-drawer>
   <mat-drawer-content class="main">
-    <div id="cand">
-      <app-game></app-game>
-    </div>
-      <button class="menu-fixed d-flex justify-content-center bg-white cmenu" mat-button (click)="drawer.toggle()">
-        <mat-icon>menu</mat-icon>
-      </button>
-    <!-- <iframe frameBorder="0" src="assets/3d/3d.html" class="frame"></iframe> -->
+    <app-game></app-game>
     
+    <button class="menu-fixed d-flex justify-content-center bg-white cmenu" mat-button (click)="drawer.toggle()">
+      <mat-icon>menu</mat-icon>
+    </button>
   </mat-drawer-content>
 </mat-drawer-container>
