@@ -9,6 +9,8 @@ export class ConnectionService {
 
   blues = [];
   reds = [];
+  walls = [];
+  mines = [];
 
   pos: any;
 
@@ -25,6 +27,8 @@ export class ConnectionService {
           this.pos = j.value.filter(x => x.type === 'pos')[0];
           this.redFlag = j.value.filter(x => x.type === 'flag' && x.team === 0)[0];
           this.blueFlag = j.value.filter(x => x.type === 'flag' && x.team === 1)[0];
+          this.walls = j.value.filter(x => x.type === 'wall');
+          this.mines = j.value.filter(x => x.type === 'mine');
         } else {
           console.log(hel);
         }
