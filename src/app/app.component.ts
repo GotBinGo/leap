@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { ConnectionService } from './connection.service';
 
 @Component({
   selector: 'app-root',
@@ -8,6 +9,9 @@ import { Component } from '@angular/core';
 export class AppComponent {
   messages = [];
   chatInput = '';
+  constructor(cs: ConnectionService) {
+  }
+
   send = () => {
     this.messages.push({message: this.chatInput, self: this.chatInput.length % 2 === 0, sender: 'Toomi'});
     this.chatInput = '';

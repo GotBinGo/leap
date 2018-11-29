@@ -1,5 +1,6 @@
 import { Component, OnInit, HostListener } from '@angular/core';
 import * as THREE from 'three';
+import { ConnectionService } from '../connection.service';
 @Component({
   selector: 'app-game',
   templateUrl: './game.component.html',
@@ -7,7 +8,9 @@ import * as THREE from 'three';
 })
 export class GameComponent implements OnInit {
 
-  constructor() { }
+  constructor(public cs: ConnectionService) { }
+
+  scale = 40;
 
   renderer = new THREE.WebGLRenderer();
   scene = new THREE.Scene();
@@ -16,6 +19,16 @@ export class GameComponent implements OnInit {
   pitchObject = new THREE.Object3D();
   yawObject = new THREE.Object3D();
   instructions = document.getElementById( 'instructions' );
+  time = Date.now();
+  keys = [false, false, false, false];
+
+  geometry = new THREE.SphereBufferGeometry( 30 / 40, 32, 32 );
+  rm = new THREE.MeshBasicMaterial( { color: 0xff0000 } );
+  bm = new THREE.MeshBasicMaterial( { color: 0x0000ff } );
+  rs = new THREE.Mesh( this.geometry, this.rm );
+  bs = new THREE.Mesh( this.geometry, this.bm );
+  blues = [this.bs, this.bs, this.bs];
+  reds = [this.rs, this.rs, this.rs];
 
   ngOnInit() {
     this.renderer.shadowMapEnabled = true;
@@ -25,7 +38,8 @@ export class GameComponent implements OnInit {
     this.renderer.setSize( window.innerWidth, window.innerHeight );
     const cand = document.getElementById( 'cand' );
     cand.appendChild( this.renderer.domElement );
-
+    window.addEventListener('keydown', this.onKeyDown);
+    window.addEventListener('keyup', this.onKeyUp);
 
     const ambient = new THREE.AmbientLight( 0x666666 );
     this.scene.add( ambient );
@@ -48,15 +62,35 @@ export class GameComponent implements OnInit {
     this.yawObject.add( this.pitchObject );
     this.scene.add( this.yawObject );
 
-    const light = new THREE.PointLight( 0xff0000, 1, 100 );
-    light.position.set(-20, 1, -10);
-    this.scene.add(light);
+    this.scene.add(this.blues[0]);
+    this.scene.add(this.blues[1]);
+    this.scene.add(this.blues[2]);
+    this.scene.add(this.reds[0]);
+    this.scene.add(this.reds[1]);
+    this.scene.add(this.reds[2]);
+
     this.animate();
   }
 
   animate = () => {
     requestAnimationFrame(this.animate);
+    this.update( Date.now() - this.time );
     this.renderer.render( this.scene, this.camera );
+    this.time = Date.now();
+  }
+
+  update = (time) => {
+
+    for (const i of Object.keys(this.cs.blues)) {
+      const c = this.cs.blues[i];
+      this.yawObject.position.set(this.cs.pos.x / this.scale, 5, this.cs.pos.y / this.scale);
+      console.log(c.x / this.scale);
+      this.blues[i].position.set(c.x / this.scale, 1, c.y / this.scale);
+    }
+    for (const i of Object.keys(this.cs.reds)) {
+      const c = this.cs.reds[i];
+      this.reds[i].position.set(c.x / this.scale, 1, c.y / this.scale);
+    }
   }
 
   @HostListener('document:mousemove', ['$event'])
@@ -80,12 +114,11 @@ export class GameComponent implements OnInit {
   pointerLockChange = (event) => {
     const blocker = document.getElementById( 'blocker' );
     const instructions = document.getElementById( 'instructions' );
-    const element = document.body;
+    const element = document.getElementById('cand');
     if (document['pointerLockElement'] === element ||
       document['mozPointerLockElement'] === element ||
       document['webkitPointerLockElement'] === element ) {
       this.controls.enabled = true;
-
         blocker.style.display = 'none';
     } else {
         this.controls.enabled = false;
@@ -106,33 +139,11 @@ export class GameComponent implements OnInit {
   onClick = (event) => {
     const instructions = document.getElementById( 'instructions' );
     instructions.style.display = 'none';
-    const element: any = document.body;
+    const element: any = document.getElementById( 'cand' );
 
     element.requestPointerLock = element.requestPointerLock || element.mozRequestPointerLock || element.webkitRequestPointerLock;
+    element.requestPointerLock();
 
-    if ( /Firefox/i.test( navigator.userAgent ) ) {
-        const fullscreenchange = function () {
-          if (document['fullscreenElement'] === element ||
-              document['mozFullscreenElement'] === element ||
-              document['mozFullScreenElement'] === element ) {
-
-              document.removeEventListener( 'fullscreenchange', fullscreenchange );
-              document.removeEventListener( 'mozfullscreenchange', fullscreenchange );
-              element.requestPointerLock();
-          }
-        };
-
-        document.addEventListener( 'fullscreenchange', fullscreenchange, false );
-        document.addEventListener( 'mozfullscreenchange', fullscreenchange, false );
-
-        element.requestFullscreen = element.requestFullscreen || element.mozRequestFullscreen ||
-        element.mozRequestFullScreen || element.webkitRequestFullscreen;
-
-        element.requestFullscreen();
-
-    } else {
-        element.requestPointerLock();
-    }
   }
 
   @HostListener('window:resize', ['$event'])
@@ -141,4 +152,99 @@ export class GameComponent implements OnInit {
     this.camera.updateProjectionMatrix();
     this.renderer.setSize( window.innerWidth, window.innerHeight );
   }
+
+  onKeyDown = (e) => {
+    if (document.activeElement !== document.body) {
+      return;
+    }
+    if (e.keyCode === 37 || e.keyCode === 65) { // left
+      if (!this.keys[0]) {
+        this.keys[0] = true;
+        console.log('left');
+        this.cs.ws.send('/game keys 0 1');
+      }
+    } else if (e.keyCode === 38 || e.keyCode === 87) { // up
+      if (!this.keys[1]) {
+          this.keys[1] = true;
+          this.cs.ws.send('/game keys 1 1');
+        }
+    } else if (e.keyCode === 39 || e.keyCode === 68) { // right
+      if (!this.keys[2]) {
+        this.keys[2] = true;
+        this.cs.ws.send('/game keys 2 1');
+      }
+    } else if (e.keyCode === 40 || e.keyCode === 83) { // down
+      if (!this.keys[3]) {
+        this.keys[3] = true;
+        this.cs.ws.send('/game keys 3 1');
+      }
+    }
+  }
+  onKeyUp = (e) => {
+    if (document.activeElement !== document.body) {
+      return;
+    }
+    if (e.keyCode === 37 || e.keyCode === 65) { // left
+      if (this.keys[0]) {
+        this.keys[0] = false;
+        console.log('left up');
+        this.cs.ws.send('/game keys 0 0');
+      }
+    } else if (e.keyCode === 38 || e.keyCode === 87) { // up
+      if (this.keys[1]) {
+          this.keys[1] = false;
+          this.cs.ws.send('/game keys 1 0');
+        }
+    } else if (e.keyCode === 39 || e.keyCode === 68) { // right
+      if (this.keys[2]) {
+        this.keys[2] = false;
+        this.cs.ws.send('/game keys 2 0');
+      }
+    } else if (e.keyCode === 40 || e.keyCode === 83) { // down
+      if (this.keys[3]) {
+        this.keys[3] = false;
+        this.cs.ws.send('/game keys 3 0');
+      }
+    }
+  }
+// function onKeyUp(e)
+// {
+// 	if(e.keyCode == 37 || e.keyCode == 65)
+// 	{
+// 		if(keys[0])
+// 		{
+// 			keys[0] = false;
+// 			ws.send("/game keys 0 0");
+// 		}
+// 	}
+// 	if(e.keyCode == 38 || e.keyCode == 87)
+// 	{
+// 		if(keys[1])
+// 		{
+// 			keys[1] = false;
+// 			ws.send("/game keys 1 0");
+// 		}
+// 	}
+// 	if(e.keyCode == 39 || e.keyCode == 68)
+// 	{
+// 		if(keys[2])
+// 		{
+// 			keys[2] = false;
+// 			ws.send("/game keys 2 0");
+// 		}
+// 	}
+// 	if(e.keyCode == 40 || e.keyCode == 83)
+// 	{
+// 		if(keys[3])
+// 		{
+// 			keys[3] = false;
+// 			ws.send("/game keys 3 0");
+// 		}
+// 	}
+// 	if(e.keyCode == 9) //TAB
+// 	{	
+// 		ws.send("/game keys 4 0");
+// 		e.preventDefault();	
+// 	}	
+// }
 }
