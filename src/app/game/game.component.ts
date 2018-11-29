@@ -23,11 +23,11 @@ export class GameComponent implements OnInit {
   keys = [false, false, false, false];
 
   ballGeometry = new THREE.SphereBufferGeometry( 30 / this.scale, 32, 32 );
-  mineGeometry = new THREE.SphereBufferGeometry( 20 / this.scale, 32, 32 );
+  mineGeometry = new THREE.SphereBufferGeometry( 10 / this.scale, 32, 32 );
 
   rm = new THREE.MeshLambertMaterial( { color: 0xff0000 } ); // red ball
   bm = new THREE.MeshLambertMaterial( { color: 0x0000ff } ); // blue ball
-  mm = new THREE.MeshLambertMaterial( { color: 0x000000 } ); // mine
+  mm = new THREE.MeshLambertMaterial( { color: 0x770077 } ); // mine
 
   blues = [this.bb(), this.bb(), this.bb()];
   reds = [this.rb(), this.rb(), this.rb()];
@@ -54,7 +54,32 @@ export class GameComponent implements OnInit {
   }
   mb() {
     const mine = new THREE.Mesh( this.mineGeometry, this.mm );
+    mine.add(new THREE.Mesh(new THREE.BoxGeometry(0.1, 1, 0.1), this.mm));
+    mine.add(new THREE.Mesh(new THREE.BoxGeometry(1, 0.1, 0.1), this.mm));
+    mine.add(new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.1, 1), this.mm));
+    let gg = new THREE.BoxGeometry(0.1, 0.1, 1);
+    gg.rotateY(Math.PI / 4);
+    mine.add(new THREE.Mesh(gg, this.mm));
+    gg = new THREE.BoxGeometry(0.1, 0.1, 1);
+    gg.rotateY(-Math.PI / 4);
+    mine.add(new THREE.Mesh(gg, this.mm));
+
+    gg = new THREE.BoxGeometry(0.1, 1, 0.1);
+    gg.rotateX(-Math.PI / 4);
+    mine.add(new THREE.Mesh(gg, this.mm));
+    gg = new THREE.BoxGeometry(0.1, 1, 0.1);
+    gg.rotateX(Math.PI / 4);
+    mine.add(new THREE.Mesh(gg, this.mm));
+
+    gg = new THREE.BoxGeometry(0.1, 1, 0.1);
+    gg.rotateZ(-Math.PI / 4);
+    mine.add(new THREE.Mesh(gg, this.mm));
+    gg = new THREE.BoxGeometry(0.1, 1, 0.1);
+    gg.rotateZ(Math.PI / 4);
+    mine.add(new THREE.Mesh(gg, this.mm));
+
     mine.position.set(0, -10, 0);
+
     return mine;
   }
   cc() {
@@ -64,6 +89,7 @@ export class GameComponent implements OnInit {
     return ww;
   }
   ngOnInit() {
+
     const bf = new THREE.Mesh( this.ballGeometry, new THREE.MeshBasicMaterial({color: 0x0000ff}));
     bf.position.set(0, 1, 0);
     this.blueFlag.add(bf);
@@ -85,7 +111,7 @@ export class GameComponent implements OnInit {
     const ambient = new THREE.AmbientLight( 0x666666 );
     this.scene.add( ambient );
 
-    const floorTexture = new THREE.ImageUtils.loadTexture('assets/checkerboard.jpg');
+    const floorTexture = THREE.ImageUtils.loadTexture('assets/checkerboard.jpg');
     floorTexture.wrapS = floorTexture.wrapT = THREE.RepeatWrapping;
     floorTexture.repeat.set(10, 10);
 
