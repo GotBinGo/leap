@@ -12,6 +12,9 @@ export class ConnectionService {
 
   pos: any;
 
+  redFlag: any;
+  blueFlag: any;
+
   constructor() {
     this.ws.onmessage = (evt) => {
       const hel = evt.data.split('&nbsp;').join(' ');
@@ -20,6 +23,8 @@ export class ConnectionService {
           this.blues = j.value.filter(x => x.c === 'blue');
           this.reds = j.value.filter(x => x.c === 'red');
           this.pos = j.value.filter(x => x.type === 'pos')[0];
+          this.redFlag = j.value.filter(x => x.type === 'flag' && x.team === 0)[0];
+          this.blueFlag = j.value.filter(x => x.type === 'flag' && x.team === 1)[0];
         } else {
           console.log(hel);
         }
