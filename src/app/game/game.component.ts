@@ -29,8 +29,8 @@ export class GameComponent implements OnInit {
   bm = new THREE.MeshLambertMaterial( { color: 0x0000ff } ); // blue ball
   mm = new THREE.MeshLambertMaterial( { color: 0x770077 } ); // mine
 
-  blues = [this.bb(), this.bb(), this.bb()];
-  reds = [this.rb(), this.rb(), this.rb()];
+  blues = [this.bb(), this.bb(), this.bb(), this.bb(), this.bb(), this.bb()];
+  reds = [this.rb(), this.rb(), this.rb(), this.rb(), this.rb(), this.rb()];
   redFlag = new THREE.PointLight( 0xff0000, 1, 100 );
   blueFlag = new THREE.PointLight( 0x0000ff, 1, 100 );
 
@@ -133,12 +133,14 @@ export class GameComponent implements OnInit {
     this.yawObject.add( this.pitchObject );
     this.scene.add( this.yawObject );
 
-    this.scene.add(this.blues[0]);
-    this.scene.add(this.blues[1]);
-    this.scene.add(this.blues[2]);
-    this.scene.add(this.reds[0]);
-    this.scene.add(this.reds[1]);
-    this.scene.add(this.reds[2]);
+    for (const i of Object.keys(this.blues)) {
+      this.scene.add(this.blues[i]);
+    }
+
+    for (const i of Object.keys(this.reds)) {
+      this.scene.add(this.reds[i]);
+    }
+
 
     this.scene.add(this.redFlag);
     this.scene.add(this.blueFlag);
