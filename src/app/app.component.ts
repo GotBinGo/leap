@@ -9,11 +9,17 @@ import { ConnectionService } from './connection.service';
 export class AppComponent {
   messages = [];
   chatInput = '';
-  constructor(cs: ConnectionService) {
+  constructor(private cs: ConnectionService) {
+    cs.onMessage.subscribe(this.onMessage);
+  }
+
+  onMessage = (msg) => {
+    this.messages.push(JSON.parse(msg));
+
   }
 
   send = () => {
-    this.messages.push({message: this.chatInput, self: this.chatInput.length % 2 === 0, sender: 'Toomi'});
+    this.cs.ws.send(this.chatInput);
     this.chatInput = '';
     console.log(scroll);
     setTimeout(() => {document.getElementById('scroll').scrollTo(0, 999999999); }, 100);

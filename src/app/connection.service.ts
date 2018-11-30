@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { Observable, Subject } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -17,6 +18,10 @@ export class ConnectionService {
   redFlag: any;
   blueFlag: any;
 
+  messages = [];
+  subj = new Subject<number>();
+  onMessage = this.subj.asObservable();
+
   constructor() {
     this.ws.onmessage = (evt) => {
       const hel = evt.data.split('&nbsp;').join(' ');
@@ -30,12 +35,12 @@ export class ConnectionService {
           this.walls = j.value.filter(x => x.type === 'wall');
           this.mines = j.value.filter(x => x.type === 'mine');
         } else {
-          console.log(hel);
+          this.subj.next(hel);
         }
       };
       this.ws.onopen = () => {
         console.log('connected');
-        this.ws.send('/sn ' + '3d');
+        this.ws.send('/sn ' +  window.prompt());
       };
   }
 }
