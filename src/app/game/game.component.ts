@@ -1,6 +1,7 @@
 import { Component, OnInit, HostListener } from '@angular/core';
 import * as THREE from 'three';
 import { ConnectionService } from '../connection.service';
+import { tmpdir } from 'os';
 @Component({
   selector: 'app-game',
   templateUrl: './game.component.html',
@@ -41,6 +42,14 @@ export class GameComponent implements OnInit {
     this.cc(), this.cc(), this.cc(), this.cc(), this.cc(), this.cc(), this.cc(), this.cc(), this.cc()];
   mines = [this.mb(), this.mb(), this.mb(), this.mb(), this.mb(), this.mb(), this.mb(),
       this.mb(), this.mb(), this.mb(), this.mb(), this.mb(), this.mb(), this.mb()];
+
+  clothMaterial: any;
+  clothGeometry: any;
+  object: any;
+
+  tx = 0;
+  ty = 0;
+  t = false;
 
   bb() {
     const ball = new THREE.Mesh( this.ballGeometry, this.bm );
@@ -89,6 +98,35 @@ export class GameComponent implements OnInit {
     return ww;
   }
   ngOnInit() {
+    const floorTexture = THREE.ImageUtils.loadTexture('assets/checkerboard.jpg');
+    floorTexture.wrapS = floorTexture.wrapT = THREE.RepeatWrapping;
+    floorTexture.repeat.set(10, 10);
+
+    window.sphere = {visible: false};
+    window.clothMaterial = new THREE.MeshLambertMaterial( {
+      color: 0xffffff,
+      //alphaTest: 0.5
+      map: floorTexture
+    } );
+    window.clothGeometry = new THREE.ParametricBufferGeometry( window.clothFunction, window.cloth.w, window.cloth.h );
+    this.object = new THREE.Mesh( window.clothGeometry, window.clothMaterial);
+    this.object.position.set(0, 0.5, 48);
+    this.object.rotateX(-Math.PI / 2);
+    this.object.scale.set(0.2, 0.2, 0.2);
+    window.pinsFormation = [];
+    window.pins = [ 6 ];
+
+    pins = [...Array.from(Array(100).keys()),
+      ...Array.from(Array(101).keys()).map(x => 10200 - x),
+      ...Array.from(Array(100).keys()).map(x => x * 101),
+      ...Array.from(Array(100).keys()).map(x => 100 + x * 101),
+    ]; // classic 2 pins
+
+
+
+
+    this.object.castShadow = true;
+    this.scene.add( this.object );
 
     const bf = new THREE.Mesh( this.ballGeometry, new THREE.MeshBasicMaterial({color: 0x0000ff}));
     bf.position.set(0, 1, 0);
@@ -111,9 +149,7 @@ export class GameComponent implements OnInit {
     const ambient = new THREE.AmbientLight( 0x666666 );
     this.scene.add( ambient );
 
-    const floorTexture = THREE.ImageUtils.loadTexture('assets/checkerboard.jpg');
-    floorTexture.wrapS = floorTexture.wrapT = THREE.RepeatWrapping;
-    floorTexture.repeat.set(10, 10);
+
 
     const geometry = new THREE.PlaneGeometry( 2000 / this.scale, 2000 / this.scale, 200, 200);
     geometry.applyMatrix( new THREE.Matrix4().makeRotationX( - Math.PI / 2 ) );
@@ -123,7 +159,7 @@ export class GameComponent implements OnInit {
     const mesh = new THREE.Mesh( geometry, material );
     mesh.castShadow = true;
     mesh.receiveShadow = true;
-    this.scene.add( mesh );
+    //this.scene.add( mesh );
 
     this.pitchObject = new THREE.Object3D();
     this.pitchObject.add( this.camera );
@@ -158,9 +194,35 @@ export class GameComponent implements OnInit {
 
   animate = () => {
     requestAnimationFrame(this.animate);
+
+
     this.update( Date.now() - this.time );
+
+
+    const time = Date.now();
+
+    const windStrength = Math.cos( time / 7000 ) * 20 + 40;
+    window.windForce.set( Math.sin( time / 2000 ), Math.cos( time / 3000 ), Math.sin( time / 1000 ) )
+    window.windForce.normalize();
+    window.windForce.multiplyScalar( 0 );
+
+    const p = window.cloth.particles;
+
+    for ( let i = 0, il = p.length; i < il; i ++ ) {
+
+      const v = p[ i ].position;
+
+      window.clothGeometry.attributes.position.setXYZ( i, v.x / 10, -10 + v.y / 10, v.z / 10 );
+
+    }
+
+    window.clothGeometry.attributes.position.needsUpdate = true;
+
+    window.clothGeometry.computeVertexNormals();
+
+    window.simulate( time );
     this.renderer.render( this.scene, this.camera );
-    this.time = Date.now();
+
   }
 
   setWall(i, w) {
@@ -170,16 +232,21 @@ export class GameComponent implements OnInit {
   }
 
   update = (time) => {
-
+    this.yawObject.position.set(this.cs.pos.x / this.scale, 2, this.cs.pos.y / this.scale);
+    const hc = 65;
     for (const i of Object.keys(this.cs.blues)) {
       const c = this.cs.blues[i];
-      this.yawObject.position.set(this.cs.pos.x / this.scale, 2, this.cs.pos.y / this.scale);
-      this.blues[i].position.set(c.x / this.scale, 30 / this.scale, c.y / this.scale);
+      window.setb(i, c.x, c.y);
+
+      this.blues[i].position.set(c.x / this.scale, (hc + window.getd(i, c.x, c.y)) / hc, c.y / this.scale);
+      this.blues[i].scale.set((this.blues[i].scale.x+c.r)/30, (this.blues[i].scale.y+c.r)/30, (this.blues[i].scale.z+c.r)/30);
     }
 
     for (const i of Object.keys(this.cs.reds)) {
       const c = this.cs.reds[i];
-      this.reds[i].position.set(c.x / this.scale, 30 / this.scale, c.y / this.scale);
+      window.setb(5 + parseInt(i, 10), c.x, c.y);
+      this.reds[i].position.set(c.x / this.scale, (hc + window.getd(5 + parseInt(i, 10), c.x, c.y)) / hc, c.y / this.scale);
+      this.reds[i].scale.set(c.r/30, c.r/30, c.r/30);
     }
 
     for (const i of Object.keys(this.cs.walls)) {
@@ -193,6 +260,27 @@ export class GameComponent implements OnInit {
     this.redFlag.position.set(this.cs.redFlag.x / this.scale, 40 / this.scale, this.cs.redFlag.y / this.scale);
     this.blueFlag.position.set(this.cs.blueFlag.x / this.scale, 40 / this.scale, this.cs.blueFlag.y / this.scale);
   }
+
+  @HostListener('document:touchmove', ['$event'])
+  tm(e) {
+
+    this.onMouseMove({movementX: this.tx - e.touches[0].clientX, movementY: e.touches[0].clientY - this.ty});
+
+    this.tx = e.touches[0].clientX;
+    this.ty = e.touches[0].clientY;
+  }
+  @HostListener('document:touchstart', ['$event'])
+  ts(e) {
+    this.controls.enabled = true;
+    this.t = true;
+    this.tx = e.touches[0].clientX;
+    this.ty = e.touches[0].clientY;
+  }
+  @HostListener('document:touchend', ['$event'])
+  te(e) {
+    this.t = false;
+  }
+
 
   @HostListener('document:mousemove', ['$event'])
   onMouseMove = (event) => {

@@ -6,7 +6,7 @@ import { Observable, Subject } from 'rxjs';
 })
 export class ConnectionService {
   wsImpl = window['WebSocket'] || window['MozWebSocket'];
-  ws = new this.wsImpl('ws://' + 'localhost' + ':8080/');
+  ws = new this.wsImpl('ws://' + '192.168.89.181' + ':8080/');
 
   blues = [];
   reds = [];
@@ -40,7 +40,8 @@ export class ConnectionService {
       };
       this.ws.onopen = () => {
         console.log('connected');
-        this.ws.send('/sn ' +  window.prompt());
+        //this.ws.send('/sn ' +  window.prompt());
+        this.ws.send('/sn ' +  3);
       };
   }
 }
