@@ -1,7 +1,7 @@
 import { Component, OnInit, HostListener } from '@angular/core';
 import * as THREE from 'three';
 import { ConnectionService } from '../connection.service';
-import { tmpdir } from 'os';
+import { FabricService } from '../fabric.service';
 @Component({
   selector: 'app-game',
   templateUrl: './game.component.html',
@@ -9,8 +9,7 @@ import { tmpdir } from 'os';
 })
 export class GameComponent implements OnInit {
 
-  constructor(public cs: ConnectionService) { }
-
+  constructor(public cs: ConnectionService, private fs: FabricService) { }
   scale = 40;
 
   renderer = new THREE.WebGLRenderer();
@@ -43,8 +42,14 @@ export class GameComponent implements OnInit {
   mines = [this.mb(), this.mb(), this.mb(), this.mb(), this.mb(), this.mb(), this.mb(),
       this.mb(), this.mb(), this.mb(), this.mb(), this.mb(), this.mb(), this.mb()];
 
-  clothMaterial: any;
-  clothGeometry: any;
+ floorTexture = THREE.ImageUtils.loadTexture('assets/snow.jpg');
+
+  clothMaterial = new THREE.MeshLambertMaterial( {
+    color: 0xffffff,
+    // alphaTest: 0.5
+    map: this.floorTexture
+  });
+  clothGeometry = new THREE.ParametricBufferGeometry( this.fs.clothFunction, this.fs.cloth.w, this.fs.cloth.h );
   object: any;
 
   tx = 0;
@@ -98,29 +103,15 @@ export class GameComponent implements OnInit {
     return ww;
   }
   ngOnInit() {
-    const floorTexture = THREE.ImageUtils.loadTexture('assets/snow.jpg');
-    floorTexture.wrapS = floorTexture.wrapT = THREE.RepeatWrapping;
-    floorTexture.repeat.set(10, 10);
+    this.floorTexture.wrapS = this.floorTexture.wrapT = THREE.RepeatWrapping;
+    this.floorTexture.repeat.set(10, 10);
 
-    window.sphere = {visible: false};
-    window.clothMaterial = new THREE.MeshLambertMaterial( {
-      color: 0xffffff,
-      //alphaTest: 0.5
-      map: floorTexture
-    } );
-    window.clothGeometry = new THREE.ParametricBufferGeometry( window.clothFunction, window.cloth.w, window.cloth.h );
-    this.object = new THREE.Mesh( window.clothGeometry, window.clothMaterial);
+
+    this.object = new THREE.Mesh( this.clothGeometry, this.clothMaterial);
     this.object.position.set(0, 0.5, 48);
     this.object.rotateX(-Math.PI / 2);
     this.object.scale.set(0.2, 0.2, 0.2);
-    window.pinsFormation = [];
-    window.pins = [ 6 ];
 
-    pins = [...Array.from(Array(100).keys()),
-      ...Array.from(Array(101).keys()).map(x => 10200 - x),
-      ...Array.from(Array(100).keys()).map(x => x * 101),
-      ...Array.from(Array(100).keys()).map(x => 100 + x * 101),
-    ]; // classic 2 pins
 
 
 
@@ -128,11 +119,11 @@ export class GameComponent implements OnInit {
     this.object.castShadow = true;
     this.scene.add( this.object );
 
-    const bf = new THREE.Mesh( this.ballGeometry, new THREE.MeshBasicMaterial({color: 0x0000ff}));
-    bf.position.set(0, 1, 0);
+    const bf = new THREE.Mesh( this.ballGeometry, new THREE.MeshBasicMaterial({color: 0x0000ff, transparent: true, opacity: 0.5}));
+    bf.position.set(0, 0, 0);
     this.blueFlag.add(bf);
-    const rf = new THREE.Mesh( this.ballGeometry, new THREE.MeshBasicMaterial({color: 0xff0000}));
-    rf.position.set(0, 1, 0);
+    const rf = new THREE.Mesh( this.ballGeometry, new THREE.MeshBasicMaterial({color: 0xff0000, transparent: true, opacity: 0.5}));
+    rf.position.set(0, 0, 0);
     this.redFlag.add(rf);
 
     this.camera.position.set(0, 0, 5);
@@ -154,12 +145,12 @@ export class GameComponent implements OnInit {
     const geometry = new THREE.PlaneGeometry( 2000 / this.scale, 2000 / this.scale, 200, 200);
     geometry.applyMatrix( new THREE.Matrix4().makeRotationX( - Math.PI / 2 ) );
 
-    const material = new THREE.MeshLambertMaterial( { map: floorTexture, side: THREE.DoubleSide } );
+    const material = new THREE.MeshLambertMaterial( { map: this.floorTexture, side: THREE.DoubleSide } );
 
     const mesh = new THREE.Mesh( geometry, material );
     mesh.castShadow = true;
     mesh.receiveShadow = true;
-    //this.scene.add( mesh );
+    // this.scene.add( mesh );
 
     this.pitchObject = new THREE.Object3D();
     this.pitchObject.add( this.camera );
@@ -199,29 +190,26 @@ export class GameComponent implements OnInit {
 
 
     const time = Date.now();
-    window.setb(3,  500 + Math.sin( time / 200 ) * 200,  520 + Math.cos( time / 200 ) * 200, -310);
-    window.setb(4,  -500 + Math.sin( time / 200 ) * 200,  -480 + Math.cos( time / 200 ) * 200, -310);
+    this.fs.setb(3,  500 + Math.sin( time / 200 ) * 200,  520 + Math.cos( time / 200 ) * 200, -310);
+    this.fs.setb(4,  -500 + Math.sin( time / 200 ) * 200,  -480 + Math.cos( time / 200 ) * 200, -310);
 
     const windStrength = Math.cos( time / 7000 ) * 20 + 40;
-    window.windForce.set( Math.sin( time / 2000 ), Math.cos( time / 3000 ), Math.sin( time / 1000 ) )
-    window.windForce.normalize();
-    window.windForce.multiplyScalar( 0 );
 
-    const p = window.cloth.particles;
+    const p = this.fs.cloth.particles;
 
     for ( let i = 0, il = p.length; i < il; i ++ ) {
 
-      const v = p[ i ].position;
+      const v = p[i].position;
 
-      window.clothGeometry.attributes.position.setXYZ( i, v.x / 10, -10 + v.y / 10, v.z / 10 );
+      this.clothGeometry.attributes.position.setXYZ( i, v.x / 10, -10 + v.y / 10, v.z / 10 );
 
     }
 
-    window.clothGeometry.attributes.position.needsUpdate = true;
+    this.clothGeometry.attributes.position.needsUpdate = true;
 
-    window.clothGeometry.computeVertexNormals();
+    this.clothGeometry.computeVertexNormals();
 
-    window.simulate( time );
+    this.fs.simulate( time );
     this.renderer.render( this.scene, this.camera );
 
   }
@@ -237,17 +225,17 @@ export class GameComponent implements OnInit {
     const hc = 65;
     for (const i of Object.keys(this.cs.blues)) {
       const c = this.cs.blues[i];
-      window.setb(i, c.x, c.y);
+      this.fs.setb(i, c.x, c.y, null);
 
-      this.blues[i].position.set(c.x / this.scale, (hc + window.getd(i, c.x, c.y)) / hc, c.y / this.scale);
-      this.blues[i].scale.set((this.blues[i].scale.x+c.r)/30, (this.blues[i].scale.y+c.r)/30, (this.blues[i].scale.z+c.r)/30);
+      this.blues[i].position.set(c.x / this.scale, (hc + this.fs.getd(i, c.x, c.y)) / hc, c.y / this.scale);
+      this.blues[i].scale.set((this.blues[i].scale.x + c.r) / 30, (this.blues[i].scale.y + c.r) / 30, (this.blues[i].scale.z + c.r) / 30);
     }
 
     for (const i of Object.keys(this.cs.reds)) {
       const c = this.cs.reds[i];
-      window.setb(5 + parseInt(i, 10), c.x, c.y);
-      this.reds[i].position.set(c.x / this.scale, (hc + window.getd(5 + parseInt(i, 10), c.x, c.y)) / hc, c.y / this.scale);
-      this.reds[i].scale.set(c.r/30, c.r/30, c.r/30);
+      this.fs.setb(5 + parseInt(i, 10), c.x, c.y, null);
+      this.reds[i].position.set(c.x / this.scale, (hc + this.fs.getd(5 + parseInt(i, 10), c.x, c.y)) / hc, c.y / this.scale);
+      this.reds[i].scale.set(c.r / 30, c.r / 30, c.r / 30);
     }
 
     for (const i of Object.keys(this.cs.walls)) {
@@ -258,8 +246,8 @@ export class GameComponent implements OnInit {
       this.mines[i].position.set(this.cs.mines[i].x / this.scale, 30 / this.scale, this.cs.mines[i].y / this.scale);
     }
 
-    this.redFlag.position.set(this.cs.redFlag.x / this.scale, 40 / this.scale, this.cs.redFlag.y / this.scale);
-    this.blueFlag.position.set(this.cs.blueFlag.x / this.scale, 40 / this.scale, this.cs.blueFlag.y / this.scale);
+    this.redFlag.position.set(this.cs.redFlag.x / this.scale, 80 / this.scale, this.cs.redFlag.y / this.scale);
+    this.blueFlag.position.set(this.cs.blueFlag.x / this.scale, 80 / this.scale, this.cs.blueFlag.y / this.scale);
   }
 
   @HostListener('document:touchmove', ['$event'])
