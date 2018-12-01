@@ -10,7 +10,7 @@
 // http://cg.alexandra.dk/tag/spring-mass-system/
 // Real-time Cloth Animation http://www.darwin3d.com/gamedev/articles/col0599.pdf
 
-var DAMPING = 0.0999;
+var DAMPING = 0.999;
 var DRAG = 1 - DAMPING;
 var MASS = 3000.1;
 var restDistance = 25;
@@ -22,7 +22,7 @@ var clothFunction = plane( restDistance * xSegs, restDistance * ySegs );
 
 var cloth = new Cloth( xSegs, ySegs );
 
-var GRAVITY = 981 * -0.000 ;
+var GRAVITY = 981 * -0.00 ;
 var gravity = new THREE.Vector3( 0, 0, GRAVITY).multiplyScalar( MASS );
 
 
@@ -39,7 +39,7 @@ var windForce = new THREE.Vector3( 0, 0, 0 );
 bp = () => new THREE.Vector3( 0, - 45, 0 );
 var ballPositions = [bp(), bp(), bp(), bp(), bp(), bp(), bp(), bp(), bp(), bp(), bp(), bp()]
 
-var ballSize = 30; //40
+var ballSize = [30, 30, 30, 300, 300, 30, 30, 30, 30, 30, 30, 30];
 
 var tmpForce = new THREE.Vector3();
 
@@ -229,9 +229,9 @@ function Cloth( w, h ) {
 	this.index = index;
 
 }
-function setb(i, x, y)
+function setb(i, x, y, z)
 {
-	ballPositions[i].z = 7;	
+	ballPositions[i].z = z || 7;	
 	ballPositions[i].x = x/1000.0*1250;
 	ballPositions[i].y = 2500 - y/1000.0*1250;
 }
@@ -244,8 +244,8 @@ function getd (i, x, y) {
 		curr = -20;
 	last[i].push(curr)
 	if(last[i].length > 10) last[i].shift()
-	
-	return (last[i][0] + last[i][1] + last[i][2] + last[i][3] + last[i][4]  + last[i][5]  + last[i][6]  + last[i][7]  + last[i][8]  + last[i][9]  )/7;
+	var avg = (last[i][0] + last[i][1] + last[i][2] + last[i][3] + last[i][4]  + last[i][5]  + last[i][6]  + last[i][7]  + last[i][8]  + last[i][9]  )/7.5
+	return avg < -200 ?  -200 : avg;
 }
 function simulate( time ) {
 
@@ -314,13 +314,13 @@ function simulate( time ) {
 
 			particle = particles[ i ];
 			var pos = particle.position;
-			for (ballPosition of ballPositions) {
-				diff.subVectors( pos, ballPosition );
-				if ( diff.length() < ballSize ) {
+			for (let i of ballPositions.keys()) {
+				diff.subVectors( pos, ballPositions[i] );
+				if ( diff.length() < ballSize[i] ) {
 
 					// collided
-					diff.normalize().multiplyScalar( ballSize );
-					pos.copy( ballPosition ).add( diff );
+					diff.normalize().multiplyScalar( ballSize[i] );
+					pos.copy( ballPositions[i] ).add( diff );
 
 				}
 			}
@@ -352,7 +352,7 @@ function simulate( time ) {
 		p.position.copy( p.original );
 		p.previous.copy( p.original );
 
-		var hh = Math.sin(Date.now()/500)*0-80;
+		var hh = Math.sin(Date.now()/500)*0-200;
 		var p = particles[ 2499 ];
 			p.position.set(p.position.x, p.position.y, hh);
 			p.previous.set(p.previous.x, p.previous.y, hh);
@@ -360,8 +360,11 @@ function simulate( time ) {
 		var p = particles[ 7499 ];
 			p.position.set(p.position.x, p.position.y, hh);
 			p.previous.set(p.previous.x, p.previous.y, hh);
+		var hh = Math.sin(Date.now()/500)*0-0;
 
-
+		var p = particles[ 5500 ];
+			p.position.set(p.position.x, p.position.y, hh);
+			p.previous.set(p.previous.x, p.previous.y, hh);
 
 
 		// var p = particles[ 7496 ];

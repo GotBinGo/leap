@@ -53,12 +53,12 @@ export class GameComponent implements OnInit {
 
   bb() {
     const ball = new THREE.Mesh( this.ballGeometry, this.bm );
-    ball.position.set(0, -10, 0);
+    ball.position.set(0, -1000, 0);
     return ball;
   }
   rb() {
     const ball = new THREE.Mesh( this.ballGeometry, this.rm );
-    ball.position.set(0, -10, 0);
+    ball.position.set(0, -1000, 0);
     return ball;
   }
   mb() {
@@ -98,7 +98,7 @@ export class GameComponent implements OnInit {
     return ww;
   }
   ngOnInit() {
-    const floorTexture = THREE.ImageUtils.loadTexture('assets/checkerboard.jpg');
+    const floorTexture = THREE.ImageUtils.loadTexture('assets/snow.jpg');
     floorTexture.wrapS = floorTexture.wrapT = THREE.RepeatWrapping;
     floorTexture.repeat.set(10, 10);
 
@@ -195,11 +195,12 @@ export class GameComponent implements OnInit {
   animate = () => {
     requestAnimationFrame(this.animate);
 
-
     this.update( Date.now() - this.time );
 
 
     const time = Date.now();
+    window.setb(3,  500 + Math.sin( time / 200 ) * 200,  520 + Math.cos( time / 200 ) * 200, -310);
+    window.setb(4,  -500 + Math.sin( time / 200 ) * 200,  -480 + Math.cos( time / 200 ) * 200, -310);
 
     const windStrength = Math.cos( time / 7000 ) * 20 + 40;
     window.windForce.set( Math.sin( time / 2000 ), Math.cos( time / 3000 ), Math.sin( time / 1000 ) )
@@ -264,7 +265,7 @@ export class GameComponent implements OnInit {
   @HostListener('document:touchmove', ['$event'])
   tm(e) {
 
-    this.onMouseMove({movementX: this.tx - e.touches[0].clientX, movementY: e.touches[0].clientY - this.ty});
+    this.onMouseMove({movementX: this.tx - e.touches[0].clientX, movementY: e.touches[0].clientY});
 
     this.tx = e.touches[0].clientX;
     this.ty = e.touches[0].clientY;
