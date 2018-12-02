@@ -188,28 +188,18 @@ export class GameComponent implements OnInit {
 
     this.update( Date.now() - this.time );
 
-
-    const time = Date.now();
-    this.fs.setb(3,  500 + Math.sin( time / 200 ) * 200,  520 + Math.cos( time / 200 ) * 200, -310);
-    this.fs.setb(4,  -500 + Math.sin( time / 200 ) * 200,  -480 + Math.cos( time / 200 ) * 200, -310);
-
-    const windStrength = Math.cos( time / 7000 ) * 20 + 40;
-
     const p = this.fs.cloth.particles;
 
     for ( let i = 0, il = p.length; i < il; i ++ ) {
-
       const v = p[i].position;
-
       this.clothGeometry.attributes.position.setXYZ( i, v.x / 10, -10 + v.y / 10, v.z / 10 );
-
     }
 
-    this.clothGeometry.attributes.position.needsUpdate = true;
+    this.clothGeometry.attributes.position['needsUpdate'] = true;
 
     this.clothGeometry.computeVertexNormals();
 
-    this.fs.simulate( time );
+    this.fs.simulate();
     this.renderer.render( this.scene, this.camera );
 
   }
@@ -248,6 +238,9 @@ export class GameComponent implements OnInit {
 
     this.redFlag.position.set(this.cs.redFlag.x / this.scale, 80 / this.scale, this.cs.redFlag.y / this.scale);
     this.blueFlag.position.set(this.cs.blueFlag.x / this.scale, 80 / this.scale, this.cs.blueFlag.y / this.scale);
+
+    this.fs.setb(12,  500 + Math.sin( Date.now() / 200 ) * 200,  520 + Math.cos( Date.now() / 200 ) * 200, -310);
+    this.fs.setb(13,  -500 + Math.sin( Date.now() / 200 ) * 200,  -480 + Math.cos( Date.now() / 200 ) * 200, -310);
   }
 
   @HostListener('document:touchmove', ['$event'])
