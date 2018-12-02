@@ -2,6 +2,7 @@ import { Component, OnInit, HostListener } from '@angular/core';
 import * as THREE from 'three';
 import { ConnectionService } from '../connection.service';
 import { FabricService } from '../fabric.service';
+import { SnowParticle } from '../snow-particle';
 @Component({
   selector: 'app-game',
   templateUrl: './game.component.html',
@@ -49,6 +50,8 @@ export class GameComponent implements OnInit {
   floorTexture = this.loader.load('assets/snow2.jpg');
   floorTextureNormal = this.loader.load('assets/snow2-normal2.jpg');
   floorTextureDisplacement = this.loader.load('assets/snow-displacement.jpg');
+  particleImage = this.loader.load('assets/particle.png');
+  snowMaterial = new THREE.SpriteMaterial( { map: this.particleImage, transparent: true, side: THREE.DoubleSide} );
 
   clothMaterial = new THREE.MeshPhongMaterial( {
     color: 0xffffff,
@@ -66,6 +69,7 @@ export class GameComponent implements OnInit {
   tx = 0;
   ty = 0;
   t = false;
+  snowParticles = [];
 
   bb() {
     const ball = new THREE.Mesh( this.ballGeometry, this.bm );
@@ -120,20 +124,30 @@ export class GameComponent implements OnInit {
     ww.position.set(1, 1, 1);
     return ww;
   }
+
   ngOnInit() {
+    for (let i = 0; i < 1000; i++) {
+      const particle = new SnowParticle( this.snowMaterial);
+      particle.position.x = Math.random() * 200 - 100;
+      particle.position.y = Math.random() * 400 - 50;
+      particle.position.z = Math.random() * 200 - 100;
+      particle.scale.x = particle.scale.y =  0.4;
+      this.scene.add( particle );
+
+      this.snowParticles.push(particle);
+    }
+
+    // this.scene.fog = new THREE.FogExp2(0xffffff, 0.07);
+    // this.scene.background = new THREE.Color( 0xffffff );
+
     this.floorTexture.anisotropy = 4;
     this.floorTextureNormal.anisotropy = 4;
-    //this.floorTextureNormal.repeat.set(.1, .1);
     this.floorTextureDisplacement.repeat.set(.01, .01);
 
     this.object = new THREE.Mesh( this.clothGeometry, this.clothMaterial);
     this.object.position.set(0, -0.4, 48);
     this.object.rotateX(-Math.PI / 2);
     this.object.scale.set(0.2, 0.2, 0.2);
-
-
-
-
 
     this.object.castShadow = this.shadow ;
     this.object.receiveShadow = this.shadow;
@@ -243,6 +257,26 @@ export class GameComponent implements OnInit {
   }
 
   update = (time) => {
+
+    for (let i = 0; i < this.snowParticles.length; i++) {
+      const particle = this.snowParticles[i];
+      particle.updatePhysics();
+      if (particle.position.y < -50) {
+        particle.position.y += 250;
+      }
+      const box = 100;
+      if (particle.position.x > box) {
+        particle.position.x -= box;
+      } else if (particle.position.x < -box) {
+        particle.position.x += box;
+      }
+      if (particle.position.z > box) {
+        particle.position.z -= box;
+      } else if (particle.position.z < -box) {
+        particle.position.z += box;
+      }
+    }
+
     this.yawObject.position.set(this.cs.pos.x / this.scale, 2, this.cs.pos.y / this.scale);
     const hc = 65;
 
