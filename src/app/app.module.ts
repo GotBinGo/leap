@@ -6,6 +6,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule, MatCardModule, MatSidenavModule, MatInputModule, MatIconModule, MatChipsModule, MatFormFieldModule } from '@angular/material';
 import { GameComponent } from './game/game.component';
+import { RouterModule } from '@angular/router';
 
 @NgModule({
   declarations: [
@@ -24,6 +25,9 @@ import { GameComponent } from './game/game.component';
     MatChipsModule,
     MatFormFieldModule,
     ReactiveFormsModule,
+    RouterModule.forRoot([
+      { path: '**', component: AppComponent }
+    ]),
   ],
   providers: [],
   bootstrap: [AppComponent]

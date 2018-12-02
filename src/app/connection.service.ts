@@ -47,7 +47,7 @@ export class ConnectionService {
       };
       this.ws.onopen = () => {
         console.log('connected');
-        this.ws.send('/sn ' +  window.prompt());
+        this.ws.send('/sn ' +  window.prompt('Mi legyen a neved?'));
         // this.ws.send('/sn ' +  3);
       };
   }

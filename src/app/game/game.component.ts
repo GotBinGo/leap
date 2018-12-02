@@ -3,6 +3,7 @@ import * as THREE from 'three';
 import { ConnectionService } from '../connection.service';
 import { FabricService } from '../fabric.service';
 import { SnowParticle } from '../snow-particle';
+
 @Component({
   selector: 'app-game',
   templateUrl: './game.component.html',
@@ -13,7 +14,7 @@ export class GameComponent implements OnInit {
   constructor(public cs: ConnectionService, private fs: FabricService) { }
   scale = 40;
 
-  shadow = false;
+  shadow = window.location.href.split('/')[3] === 's';
   shadowMapSize = 2048;
 
   renderer = new THREE.WebGLRenderer();
@@ -197,7 +198,7 @@ export class GameComponent implements OnInit {
     this.pitchObject.add( this.camera );
 
     this.yawObject = new THREE.Object3D();
-    this.yawObject.position.y = 2;
+    this.yawObject.position.y = 200;
     this.yawObject.add( this.pitchObject );
     this.scene.add( this.yawObject );
 
