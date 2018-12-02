@@ -13,3 +13,43 @@
     align-items: center;
     position: absolute;
 }
+
+.score-red {
+    position: absolute;
+    left: 30%;
+    top: 4vmin;
+    color: red;
+    font-size: 7vmin;
+    text-shadow:
+    -1px -1px 0 white,  
+    1px -1px 0 white,
+    -1px 1px 0 white,
+    1px 1px 0 white;
+    transform: translate(-50%, -50%);
+}
+.score-blue {
+    position: absolute;
+    left: 70%;
+    top: 4vmin;
+    color: blue;
+    font-size: 7vmin;
+    text-shadow:
+    -1px -1px 0 white,  
+    1px -1px 0 white,
+    -1px 1px 0 white,
+    1px 1px 0 white;
+    transform: translate(-50%, -50%);
+}
+.time {
+    position: absolute;
+    left: 50%;
+    top: 4vmin;
+    color: black;
+    font-size: 7vmin;
+    text-shadow:
+    -1px -1px 0 white,  
+    1px -1px 0 white,
+    -1px 1px 0 white,
+    1px 1px 0 white;
+    transform: translate(-50%, -50%);
+}

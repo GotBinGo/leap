@@ -14,11 +14,15 @@ export class ConnectionService {
   mines = [];
 
   pos: any;
+  gameStarted = false;
 
   redFlag: any;
   blueFlag: any;
 
-  messages = [];
+  redScore: number;
+  blueScore: number;
+
+
   subj = new Subject<number>();
   onMessage = this.subj.asObservable();
 
@@ -34,6 +38,9 @@ export class ConnectionService {
           this.blueFlag = j.value.filter(x => x.type === 'flag' && x.team === 1)[0];
           this.walls = j.value.filter(x => x.type === 'wall');
           this.mines = j.value.filter(x => x.type === 'mine');
+          this.redScore = j.value.filter(x => x.type === 'text' && x.color === 'red')[0].text;
+          this.blueScore = j.value.filter(x => x.type === 'text' && x.color === 'blue')[0].text;
+          this.gameStarted = true;
         } else {
           this.subj.next(hel);
         }

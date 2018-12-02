@@ -4,20 +4,11 @@ import { NgIf } from '@angular/common';
 
 class Particle {
   position = new THREE.Vector3();
-  previous = new THREE.Vector3();
   original = new THREE.Vector3();
-  mass: number;
-  invMass: number;
-  tmp = new THREE.Vector3();
-  tmp2 = new THREE.Vector3();
 
-  constructor(ctx: any, x, y, z, mass) {
-    this.mass = mass;
-    this.invMass = 1 / mass;
-    ctx.clothFunction(x, y, this.position); // position
-    ctx.clothFunction(x, y, this.previous); // previous
+  constructor(ctx: any, x, y, z) {
+    ctx.clothFunction(x, y, this.position);
     ctx.clothFunction(x, y, this.original);
-
   }
 }
 class Cloth {
@@ -32,60 +23,51 @@ class Cloth {
 })
 export class FabricService {
 
-  lastTime: any;
   cloth: Cloth = {w: 100, h: 100, constraints: [], particles: []};
-  diff = new THREE.Vector3();
-  MASS = 3000.1;
   tileSize = 25;
 
   pins = [...Array.from(Array(100).keys()),
     ...Array.from(Array(101).keys()).map(x => 10200 - x),
     ...Array.from(Array(100).keys()).map(x => x * 101),
     ...Array.from(Array(100).keys()).map(x => 100 + x * 101),
-  ];
-
+];
 
   ballPositions = [this.bp(), this.bp(), this.bp(), this.bp(), this.bp(), this.bp(),
   this.bp(), this.bp(), this.bp(), this.bp(), this.bp(), this.bp(), this.bp(), this.bp()];
 
-  ballSize = [60, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 300, 300];
+  ballSize = [30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 300, 300];
   last = [[], [], [], [], [], [], [], [], [], [], [], []];
 
   constructor() {
     for (let v = 0; v <= this.cloth.h; v ++) {
       for (let u = 0; u <= this.cloth.w; u ++) {
-        this.cloth.particles.push(new Particle(this, u / this.cloth.w, v / this.cloth.h, 0, this.MASS));
+        this.cloth.particles.push(new Particle(this, u / this.cloth.w, v / this.cloth.h, 0));
       }
     }
     for (let v = 0; v < this.cloth.h; v ++) {
       for (let u = 0; u < this.cloth.w; u ++) {
         this.cloth.constraints.push([
-          this.cloth.particles[ this.index(u, v) ],
-          this.cloth.particles[ this.index(u, v + 1) ],
-          this.tileSize
-        ]);
+          this.cloth.particles[this.index(u, v)],
+          this.cloth.particles[this.index(u, v + 1)],
+          this.tileSize]);
         this.cloth.constraints.push([
-          this.cloth.particles[ this.index(u, v) ],
-          this.cloth.particles[ this.index(u + 1, v) ],
-          this.tileSize
-        ]);
+          this.cloth.particles[this.index(u, v)],
+          this.cloth.particles[this.index(u + 1, v)],
+          this.tileSize]);
       }
     }
     for (let u = this.cloth.w, v = 0; v < this.cloth.h; v ++) {
       this.cloth.constraints.push([
-        this.cloth.particles[ this.index(u, v) ],
-        this.cloth.particles[ this.index(u, v + 1) ],
-        this.tileSize
-      ]);
+        this.cloth.particles[this.index(u, v)],
+        this.cloth.particles[this.index(u, v + 1)],
+        this.tileSize]);
     }
     for (let v = this.cloth.h, u = 0; u < this.cloth.w; u ++) {
       this.cloth.constraints.push([
-        this.cloth.particles[ this.index(u, v) ],
-        this.cloth.particles[ this.index(u + 1, v) ],
-        this.tileSize
-      ]);
+        this.cloth.particles[this.index(u, v)],
+        this.cloth.particles[this.index(u + 1, v)],
+        this.tileSize]);
     }
-
   }
 
   bp () {
@@ -97,17 +79,11 @@ export class FabricService {
   }
 
   simulate = () => {
-
-    if (!this.lastTime) {
-      this.lastTime = Date.now();
-      return;
-    }
-
     const constraints = this.cloth.constraints;
 
     for (let i = 0; i < constraints.length; i++) {
       const constraint = constraints[i];
-      this.satisfyConstraints(constraint[0], constraint[1], constraint[ 2 ]);
+      this.satisfyConstraints(constraint[0], constraint[1], constraint[2]);
     }
 
     if (true) {
@@ -115,11 +91,10 @@ export class FabricService {
         const particle = this.cloth.particles[i];
         const pos = particle.position;
         for (const j of this.ballPositions.keys()) {
-          this.diff.subVectors(pos, this.ballPositions[j]);
-          if (this.diff.length() < this.ballSize[j]) {
-
-            this.diff.normalize().multiplyScalar(this.ballSize[j]);
-            pos.copy(this.ballPositions[j]).add(this.diff);
+          const diff = new THREE.Vector3(0, 0, 0).add(pos).sub(this.ballPositions[j]);
+          if (diff.length() < this.ballSize[j]) {
+            diff.normalize().multiplyScalar(this.ballSize[j]);
+            pos.copy(this.ballPositions[j]).add(diff);
           }
         }
       }
@@ -127,33 +102,29 @@ export class FabricService {
 
     for (let i = 0; i < this.pins.length; i++) {
       const xy = this.pins[i];
-      let p = this.cloth.particles[ xy ];
+      let p = this.cloth.particles[xy];
       p.position.copy(p.original);
-      p.previous.copy(p.original);
 
       let hh = Math.sin(Date.now() / 500) * 0 - 200;
-      p = this.cloth.particles[ 2499 ];
+      p = this.cloth.particles[2499];
         p.position.set(p.position.x, p.position.y, hh);
-        p.previous.set(p.previous.x, p.previous.y, hh);
 
-      p = this.cloth.particles[ 7499 ];
+      p = this.cloth.particles[7499];
         p.position.set(p.position.x, p.position.y, hh);
-        p.previous.set(p.previous.x, p.previous.y, hh);
 
       hh = Math.sin(Date.now() / 500) * 0 - 0;
-      p = this.cloth.particles[ 5500 ];
+      p = this.cloth.particles[5500];
         p.position.set(p.position.x, p.position.y, hh);
-        p.previous.set(p.previous.x, p.previous.y, hh);
     }
   }
 
   satisfyConstraints = (p1, p2, distance) => {
-    this.diff.subVectors(p2.position, p1.position);
-    const currentDist = this.diff.length();
+    const diff = new THREE.Vector3(0, 0, 0).add(p2.position).sub(p1.position);
+    const currentDist = diff.length();
     if (currentDist === 0) {
       return;
     }
-    const correction = this.diff.multiplyScalar(1 - distance / currentDist);
+    const correction = diff.multiplyScalar(1 - distance / currentDist);
     const correctionHalf = correction.multiplyScalar(0.5);
     p1.position.add(correctionHalf);
     p2.position.sub(correctionHalf);
@@ -176,6 +147,7 @@ export class FabricService {
     const xx: number = Math.trunc(x / 20 + 50);
     const yy: number = 100 - Math.trunc(y / 20 + 50) - 1;
     let curr = this.cloth.particles[yy * 101 + xx].position.z;
+
     if (Math.abs(curr) < 30) {
       curr = -20;
     }

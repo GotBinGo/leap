@@ -22,8 +22,8 @@
       <div class="row send-bar">
         <div class="col-10">
           <form>
-            <mat-form-field class="w-100">
-              <input matInput name="ch" id="d" (keyup.enter)="send()" [(ngModel)]="chatInput">
+            <mat-form-field  class="w-100" [color]="color">
+              <input [placeholder]="placeholder" matInput name="ch" id="d" (keyup.enter)="send()" [formControl]="chatInput">
             </mat-form-field>
           </form>
         </div>

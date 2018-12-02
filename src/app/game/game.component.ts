@@ -12,6 +12,9 @@ export class GameComponent implements OnInit {
   constructor(public cs: ConnectionService, private fs: FabricService) { }
   scale = 40;
 
+  shadow = true;
+  shadowMapSize = 2048;
+
   renderer = new THREE.WebGLRenderer();
   scene = new THREE.Scene();
   camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
@@ -25,9 +28,9 @@ export class GameComponent implements OnInit {
   ballGeometry = new THREE.SphereBufferGeometry( 30 / this.scale, 32, 32 );
   mineGeometry = new THREE.SphereBufferGeometry( 10 / this.scale, 32, 32 );
 
-  rm = new THREE.MeshLambertMaterial( { color: 0xff0000 } ); // red ball
-  bm = new THREE.MeshLambertMaterial( { color: 0x0000ff } ); // blue ball
-  mm = new THREE.MeshLambertMaterial( { color: 0x770077 } ); // mine
+  rm = new THREE.MeshPhongMaterial( { color: 0xff3333 } ); // red ball
+  bm = new THREE.MeshPhongMaterial( { color: 0x3333ff } ); // blue ball
+  mm = new THREE.MeshPhongMaterial( { color: 0x770077 } ); // mine
 
   blues = [this.bb(), this.bb(), this.bb(), this.bb(), this.bb(), this.bb()];
   reds = [this.rb(), this.rb(), this.rb(), this.rb(), this.rb(), this.rb()];
@@ -42,12 +45,20 @@ export class GameComponent implements OnInit {
   mines = [this.mb(), this.mb(), this.mb(), this.mb(), this.mb(), this.mb(), this.mb(),
       this.mb(), this.mb(), this.mb(), this.mb(), this.mb(), this.mb(), this.mb()];
 
- floorTexture = THREE.ImageUtils.loadTexture('assets/snow.jpg');
+  loader = new THREE.TextureLoader();
+  floorTexture = this.loader.load('assets/snow2.jpg');
+  floorTextureNormal = this.loader.load('assets/snow2-normal2.jpg');
+  floorTextureDisplacement = this.loader.load('assets/snow-displacement.jpg');
 
-  clothMaterial = new THREE.MeshLambertMaterial( {
+  clothMaterial = new THREE.MeshPhongMaterial( {
     color: 0xffffff,
-    // alphaTest: 0.5
-    map: this.floorTexture
+    map: this.floorTexture,
+    normalMap: this.floorTextureNormal,
+    // bumpMap: this.floorTextureNormal,
+    // specularMap: this.floorTextureNormal,
+    displacementMap: this.floorTextureDisplacement,
+    displacementScale: 4.5,
+    normalScale: new THREE.Vector2(0.5, 0.5),
   });
   clothGeometry = new THREE.ParametricBufferGeometry( this.fs.clothFunction, this.fs.cloth.w, this.fs.cloth.h );
   object: any;
@@ -59,11 +70,15 @@ export class GameComponent implements OnInit {
   bb() {
     const ball = new THREE.Mesh( this.ballGeometry, this.bm );
     ball.position.set(0, -1000, 0);
+    ball.receiveShadow = this.shadow;
+    ball.castShadow = this.shadow;
     return ball;
   }
   rb() {
     const ball = new THREE.Mesh( this.ballGeometry, this.rm );
     ball.position.set(0, -1000, 0);
+    ball.receiveShadow = this.shadow;
+    ball.castShadow = this.shadow;
     return ball;
   }
   mb() {
@@ -93,22 +108,26 @@ export class GameComponent implements OnInit {
     mine.add(new THREE.Mesh(gg, this.mm));
 
     mine.position.set(0, -10, 0);
+    mine.receiveShadow = this.shadow;
+    mine.castShadow = this.shadow;
 
     return mine;
   }
   cc() {
     const ww = new THREE.Mesh(this.wallShape, this.wallMaterial);
-    ww.castShadow = true;
+    ww.castShadow = this.shadow;
+    ww.receiveShadow = this.shadow;
     ww.position.set(1, 1, 1);
     return ww;
   }
   ngOnInit() {
-    this.floorTexture.wrapS = this.floorTexture.wrapT = THREE.RepeatWrapping;
-    this.floorTexture.repeat.set(10, 10);
-
+    this.floorTexture.anisotropy = 4;
+    this.floorTextureNormal.anisotropy = 4;
+    //this.floorTextureNormal.repeat.set(.1, .1);
+    this.floorTextureDisplacement.repeat.set(.01, .01);
 
     this.object = new THREE.Mesh( this.clothGeometry, this.clothMaterial);
-    this.object.position.set(0, 0.5, 48);
+    this.object.position.set(0, -0.4, 48);
     this.object.rotateX(-Math.PI / 2);
     this.object.scale.set(0.2, 0.2, 0.2);
 
@@ -116,7 +135,8 @@ export class GameComponent implements OnInit {
 
 
 
-    this.object.castShadow = true;
+    this.object.castShadow = this.shadow ;
+    this.object.receiveShadow = this.shadow;
     this.scene.add( this.object );
 
     const bf = new THREE.Mesh( this.ballGeometry, new THREE.MeshBasicMaterial({color: 0x0000ff, transparent: true, opacity: 0.5}));
@@ -125,19 +145,26 @@ export class GameComponent implements OnInit {
     const rf = new THREE.Mesh( this.ballGeometry, new THREE.MeshBasicMaterial({color: 0xff0000, transparent: true, opacity: 0.5}));
     rf.position.set(0, 0, 0);
     this.redFlag.add(rf);
+    this.redFlag.castShadow = this.shadow;
+    this.blueFlag.castShadow = this.shadow;
 
     this.camera.position.set(0, 0, 5);
-    this.renderer.shadowMapEnabled = true;
-    // this.renderer.shadowMapSoft = true;
-    // renderer.shadowMap.enabled = true;
-    // renderer.shadowMap.type = THREE.PCFSoftShadowMap; // default THREE.PCFShadowMap
+    this.renderer.shadowMap.enabled = this.shadow;
+    this.renderer.shadowMap.type = THREE.PCFSoftShadowMap; // default THREE.PCFShadowMap
     this.renderer.setSize( window.innerWidth, window.innerHeight );
     const cand = document.getElementById( 'cand' );
     cand.appendChild( this.renderer.domElement );
     window.addEventListener('keydown', this.onKeyDown);
     window.addEventListener('keyup', this.onKeyUp);
 
-    const ambient = new THREE.AmbientLight( 0x666666 );
+    let ambient = new THREE.AmbientLight( 0x333333);
+    this.scene.add( ambient );
+    ambient = new THREE.PointLight( 0xffffff, 1, 50 );
+    ambient.position.set(0, 20, 0);
+    ambient.castShadow = this.shadow;
+    ambient.receiveShadow = this.shadow;
+    ambient.shadow.mapSize.width = this.shadowMapSize; // default is 512
+    ambient.shadow.mapSize.height = this.shadowMapSize;
     this.scene.add( ambient );
 
 
@@ -145,11 +172,11 @@ export class GameComponent implements OnInit {
     const geometry = new THREE.PlaneGeometry( 2000 / this.scale, 2000 / this.scale, 200, 200);
     geometry.applyMatrix( new THREE.Matrix4().makeRotationX( - Math.PI / 2 ) );
 
-    const material = new THREE.MeshLambertMaterial( { map: this.floorTexture, side: THREE.DoubleSide } );
+    // const material = new THREE.MeshLambertMaterial( { map: this.floorTexture, side: THREE.DoubleSide } );
 
-    const mesh = new THREE.Mesh( geometry, material );
-    mesh.castShadow = true;
-    mesh.receiveShadow = true;
+    // const mesh = new THREE.Mesh( geometry, material );
+    // mesh.castShadow = true;
+    // mesh.receiveShadow = true;
     // this.scene.add( mesh );
 
     this.pitchObject = new THREE.Object3D();
@@ -168,6 +195,10 @@ export class GameComponent implements OnInit {
       this.scene.add(this.reds[i]);
     }
 
+    this.blueFlag.shadow.mapSize.width = this.shadowMapSize; // default is 512
+    this.blueFlag.shadow.mapSize.height = this.shadowMapSize;
+    this.redFlag.shadow.mapSize.width = this.shadowMapSize; // default is 512
+    this.redFlag.shadow.mapSize.height = this.shadowMapSize;
 
     this.scene.add(this.redFlag);
     this.scene.add(this.blueFlag);
@@ -186,8 +217,9 @@ export class GameComponent implements OnInit {
   animate = () => {
     requestAnimationFrame(this.animate);
 
-    this.update( Date.now() - this.time );
-
+    if (this.cs.gameStarted) {
+      this.update( Date.now() - this.time );
+    }
     const p = this.fs.cloth.particles;
 
     for ( let i = 0, il = p.length; i < il; i ++ ) {
@@ -213,6 +245,14 @@ export class GameComponent implements OnInit {
   update = (time) => {
     this.yawObject.position.set(this.cs.pos.x / this.scale, 2, this.cs.pos.y / this.scale);
     const hc = 65;
+
+    for (const ball of this.blues) {
+      ball.position.set(0, -1000, 0);
+    }
+    for (const ball of this.reds) {
+      ball.position.set(0, -1000, 0);
+    }
+
     for (const i of Object.keys(this.cs.blues)) {
       const c = this.cs.blues[i];
       this.fs.setb(i, c.x, c.y, null);
