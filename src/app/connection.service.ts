@@ -47,8 +47,8 @@ export class ConnectionService {
       };
       this.ws.onopen = () => {
         console.log('connected');
-        //this.ws.send('/sn ' +  window.prompt());
-        this.ws.send('/sn ' +  3);
+        this.ws.send('/sn ' +  window.prompt());
+        // this.ws.send('/sn ' +  3);
       };
   }
 }

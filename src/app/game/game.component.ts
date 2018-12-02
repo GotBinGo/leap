@@ -13,7 +13,7 @@ export class GameComponent implements OnInit {
   constructor(public cs: ConnectionService, private fs: FabricService) { }
   scale = 40;
 
-  shadow = true;
+  shadow = false;
   shadowMapSize = 2048;
 
   renderer = new THREE.WebGLRenderer();
