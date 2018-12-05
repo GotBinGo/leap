@@ -3,14 +3,14 @@
         {{cs.redScore | number: '1.1-1'}}
     </div>
     <div class="time">
-            {{'00:32'}}
+            {{ gameTimeGetter }}
     </div>
     <div class="score-blue">
             {{cs.blueScore | number: '1.1-1'}}
         </div>
     <div id="blocker">
         <div id="instructions">
-            <span style="font-size:40px">Click to play</span>
+            <span style="font-size:40px">{{ cs.gameStarted ? 'Click to play' : centerMessage }}</span>
         </div>
     </div>
 </div>

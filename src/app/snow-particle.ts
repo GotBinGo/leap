@@ -12,7 +12,7 @@ export class SnowParticle extends THREE.Particle {
     let angle = this.randomRange(-45, 45);
     this.velocity.set(this.velocity.x, (this.velocity.y * Math.cos(angle * TO_RADIANS)) + (this.velocity.z * Math.sin(angle * TO_RADIANS)),
     (this.velocity.y * -Math.sin(angle * TO_RADIANS)) + (this.velocity.z * Math.cos(angle * TO_RADIANS)));
-    angle = this.randomRange(0, 360);
+    angle = this.randomRange(-45, 45);
     this.velocity.set((this.velocity.x * Math.cos(angle * TO_RADIANS)) + (this.velocity.z * Math.sin(angle * TO_RADIANS)), this.velocity.y,
     (this.velocity.x * -Math.sin(angle * TO_RADIANS)) + (this.velocity.z * Math.cos(angle * TO_RADIANS)));
   }

@@ -14,6 +14,12 @@ export class GameComponent implements OnInit {
   constructor(public cs: ConnectionService, private fs: FabricService) { }
   scale = 40;
 
+  centerMessage = 'Press SPACE to start the game.';
+  startTime: any;
+  get gameTimeGetter() {
+    return Math.floor(((Date.now() - this.startTime) / 1000 / 60) || 0) + ':' + (Math.floor((Date.now() - this.startTime) / 1000) || 0);
+  }
+
   shadow = window.location.href.split('/')[3] === 's';
   shadowMapSize = 2048;
 
@@ -198,7 +204,7 @@ export class GameComponent implements OnInit {
     this.pitchObject.add( this.camera );
 
     this.yawObject = new THREE.Object3D();
-    this.yawObject.position.y = 200;
+    this.yawObject.position.y = 60;
     this.yawObject.add( this.pitchObject );
     this.scene.add( this.yawObject );
 
@@ -424,6 +430,12 @@ export class GameComponent implements OnInit {
         this.keys[3] = true;
         this.cs.ws.send('/game keys 3 1');
       }
+    }  else if (e.keyCode === 32) { // space
+        this.cs.ws.send('/g start');
+        if (!this.startTime) {
+         this.startTime = Date.now();
+        }
+        this.centerMessage = 'Click to play';
     }
   }
   onKeyUp = (e) => {
