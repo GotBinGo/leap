@@ -26,6 +26,7 @@ export class AppComponent {
       this.messages.push(msg);
       this.placeholder = '';
       this.color = 'primary';
+      setTimeout(() => {document.getElementById('scroll').scrollTo(0, 999999999); }, 100);
     }
 
   }
@@ -35,7 +36,7 @@ export class AppComponent {
     this.cs.ws.send(this.chatInput.value);
     this.chatInput.setValue('');
     console.log(scroll);
-    setTimeout(() => {document.getElementById('scroll').scrollTo(0, 999999999); }, 100);
+    setTimeout(() => {document.getElementById('scroll').scrollTo(0, 999999999); });
   }
 }
 

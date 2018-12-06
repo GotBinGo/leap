@@ -17,7 +17,8 @@ export class GameComponent implements OnInit {
   centerMessage = 'Press SPACE to start the game.';
   startTime: any;
   get gameTimeGetter() {
-    return Math.floor(((Date.now() - this.startTime) / 1000 / 60) || 0) + ':' + (Math.floor((Date.now() - this.startTime) / 1000) || 0);
+    return Math.floor(((Date.now() - this.startTime) / 1000 / 60) || 0).toString().padStart(2, '0')
+    + ':' + (Math.floor((Date.now() - this.startTime) / 1000) % 60 || 0).toString().padStart(2, '0');
   }
 
   shadow = window.location.href.split('/')[3] === 's';
