@@ -44,35 +44,34 @@ export class ConnectionService {
   constructor(public dialog: MatDialog) {
     this.ws.onmessage = (evt) => {
       const hel = evt.data.split('&nbsp;').join(' ');
-        if (evt.data[0] === '/') {
-          const j = JSON.parse(hel.split(' ')[1]);
-          this.blues = j.value.filter(x => x.c === 'blue');
-          this.reds = j.value.filter(x => x.c === 'red');
-          this.pos = j.value.filter(x => x.type === 'pos')[0];
-          this.redFlag = j.value.filter(x => x.type === 'flag' && x.team === 0)[0];
-          this.blueFlag = j.value.filter(x => x.type === 'flag' && x.team === 1)[0];
-          this.walls = j.value.filter(x => x.type === 'wall');
-          this.mines = j.value.filter(x => x.type === 'mine');
-          this.redScore = j.value.filter(x => x.type === 'text' && x.color === 'red')[0].text;
-          this.blueScore = j.value.filter(x => x.type === 'text' && x.color === 'blue')[0].text;
-          this.gameStarted = true;
-        } else {
-          this.subj.next(hel);
-        }
-      };
-      this.ws.onopen = () => {
-        console.log('connected');
-        const dialogRef = this.dialog.open(PromptComponent, {
-          width: '260px',
-          data: {name: ''},
-          disableClose: true
-        });
-        dialogRef.afterClosed().subscribe(result => {
-          this.ws.send('/sn ' +  result);
+      if (evt.data[0] === '/') {
+        const j = JSON.parse(hel.split(' ')[1]);
+        this.blues = j.value.filter(x => x.c === 'blue');
+        this.reds = j.value.filter(x => x.c === 'red');
+        this.pos = j.value.filter(x => x.type === 'pos')[0];
+        this.redFlag = j.value.filter(x => x.type === 'flag' && x.team === 0)[0];
+        this.blueFlag = j.value.filter(x => x.type === 'flag' && x.team === 1)[0];
+        this.walls = j.value.filter(x => x.type === 'wall');
+        this.mines = j.value.filter(x => x.type === 'mine');
+        this.redScore = j.value.filter(x => x.type === 'text' && x.color === 'red')[0].text;
+        this.blueScore = j.value.filter(x => x.type === 'text' && x.color === 'blue')[0].text;
+        this.gameStarted = true;
+      } else {
+        this.subj.next(hel);
+      }
+    };
 
-        });
-
-      };
-
+    this.ws.onopen = () => {
+      console.log('connected');
+      const dialogRef = this.dialog.open(PromptComponent, {
+        width: '260px',
+        data: {name: ''},
+        disableClose: true
+      });
+      dialogRef.afterClosed().subscribe(result => {
+        this.ws.send('/sn ' +  result);
+        this.ws.send('/g c ');
+      });
+    };
   }
 }

@@ -11,8 +11,41 @@
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   
   <script src="https://threejs.org/build/three.js"></script>
+  <script src="assets/joy.js"></script>
 </head>
 <body>
   <app-root></app-root>
+  <script>
+    window.setTimeout(x => {
+    window.joystick	= new VirtualJoystick({
+      container	: document.body,
+      strokeStyle	: 'cyan',
+      limitStickTravel: true,
+      mouseSupport: false,
+      stickRadius	: 120
+    });
+    window.joystick.addEventListener('touchStartValidation', function(event){
+      var touch	= event.changedTouches[0];
+      if( touch.pageX < window.innerWidth/2 )	return false;
+      return true
+    });
+    window.joystick2	= new VirtualJoystick({
+      container	: document.body,
+      strokeStyle	: 'orange',
+      limitStickTravel: true,
+      mouseSupport: false,
+      stickRadius	: 120
+    });
+    window.joystick2.addEventListener('touchStartValidation', function(event){
+      var touch	= event.changedTouches[0];
+      if( touch.pageX > window.innerWidth/2 )	return false;
+      return true
+    });
+    window.joystick2.addEventListener('touchEnd', function(){
+				window.up = true;
+    })
+
+  }, 1000);
+  </script>
 </body>
 </html>

@@ -21,6 +21,9 @@ export class GameComponent implements OnInit {
     + ':' + (Math.floor((Date.now() - this.startTime) / 1000) % 60 || 0).toString().padStart(2, '0');
   }
 
+  jox = 0;
+  joy = 0;
+
   shadow = window.location.href.split('/')[3] === 's';
   shadowMapSize = 2048;
 
@@ -237,6 +240,48 @@ export class GameComponent implements OnInit {
   }
 
   animate = () => {
+    if (window['joystick']) {
+      const blocker = document.getElementById( 'blocker' );
+      this.jox = window['joystick'].deltaX() ;
+      this.joy = window['joystick'].deltaY() / 3;
+      if (this.jox || this.joy) {
+        this.controls.enabled = true;
+        blocker.style.display = 'none';
+        this.onMouseMove({});
+      }
+    }
+    if (window['joystick2']) {
+      console.log();
+      if (window['up']) {
+        this.cs.ws.send('/game keys 0 0');
+        this.cs.ws.send('/game keys 1 0');
+        this.cs.ws.send('/game keys 2 0');
+        this.cs.ws.send('/game keys 3 0');
+        window['up'] = false;
+      }
+
+      if (window['joystick2'].left()) {
+        this.cs.ws.send('/game keys 0 1');
+      } else if (window['joystick2']._baseX !== 0) {
+        this.cs.ws.send('/game keys 0 0');
+      }
+      if (window['joystick2'].right()) {
+        this.cs.ws.send('/game keys 2 1');
+      } else if (window['joystick2']._baseX !== 0) {
+        this.cs.ws.send('/game keys 2 0');
+      }
+      if (window['joystick2'].up()) {
+        this.cs.ws.send('/game keys 1 1');
+      } else if (window['joystick2']._baseY !== 0) {
+        this.cs.ws.send('/game keys 1 0');
+      }
+      if (window['joystick2'].down()) {
+        this.cs.ws.send('/game keys 3 1');
+      } else if (window['joystick2']._baseY !== 0) {
+        this.cs.ws.send('/game keys 3 0');
+      }
+    }
+
     requestAnimationFrame(this.animate);
 
     if (this.cs.gameStarted) {
@@ -328,7 +373,7 @@ export class GameComponent implements OnInit {
   @HostListener('document:touchmove', ['$event'])
   tm(e) {
 
-    this.onMouseMove({movementX: this.tx - e.touches[0].clientX, movementY: e.touches[0].clientY});
+    // this.onMouseMove({movementX: this.tx - e.touches[0].clientX, movementY: e.touches[0].clientY});
 
     this.tx = e.touches[0].clientX;
     this.ty = e.touches[0].clientY;
@@ -352,8 +397,8 @@ export class GameComponent implements OnInit {
       return;
     }
 
-    const movementX = event.movementX || event.mozMovementX || event.webkitMovementX || 0;
-    const movementY = event.movementY || event.mozMovementY || event.webkitMovementY || 0;
+    const movementX = event.movementX || event.mozMovementX || event.webkitMovementX || this.jox || 0;
+    const movementY = event.movementY || event.mozMovementY || event.webkitMovementY || this.joy || 0;
 
     this.yawObject.rotation.y -= movementX * 0.002;
     this.cs.ws.send('/game keys 4 ' + this.yawObject.rotation.y);
@@ -373,7 +418,7 @@ export class GameComponent implements OnInit {
       document['mozPointerLockElement'] === element ||
       document['webkitPointerLockElement'] === element ) {
       this.controls.enabled = true;
-        blocker.style.display = 'none';
+      blocker.style.display = 'none';
     } else {
         this.controls.enabled = false;
         blocker.style.display = 'flex';
