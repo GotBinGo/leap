@@ -12,6 +12,7 @@
   
   <script src="https://threejs.org/build/three.js"></script>
   <script src="assets/joy.js"></script>
+  <link rel="manifest" href="assets/manifest.json">
 </head>
 <body>
   <app-root></app-root>
@@ -42,9 +43,9 @@
       return true
     });
     window.joystick2.addEventListener('touchEnd', function(){
-				window.up = true;
+        window.up = true;
     })
-
+    
   }, 1000);
   </script>
 </body>
