@@ -1,5 +1,20 @@
-import { Injectable } from '@angular/core';
-import { Observable, Subject } from 'rxjs';
+import { Injectable, Component, Inject } from '@angular/core';
+import { Subject } from 'rxjs';
+import {MatDialog, MatDialogRef, MAT_DIALOG_DATA} from '@angular/material';
+
+@Component({
+  template: '<h4>Mi legyen a neved?</h4><mat-form-field class="w-100"><input matInput autofocus (keyup.enter)="onClick()" [(ngModel)]="data.name"></mat-form-field> <button mat-button class="float-right" [mat-dialog-close]="data.name">Ok</button>',
+})
+export class PromptComponent {
+
+  constructor(
+    public dialogRef: MatDialogRef<PromptComponent>,
+    @Inject(MAT_DIALOG_DATA) public data: any) {}
+
+  onClick(): void {
+    this.dialogRef.close(this.data.name);
+  }
+}
 
 @Injectable({
   providedIn: 'root'
@@ -26,7 +41,7 @@ export class ConnectionService {
   subj = new Subject<number>();
   onMessage = this.subj.asObservable();
 
-  constructor() {
+  constructor(public dialog: MatDialog) {
     this.ws.onmessage = (evt) => {
       const hel = evt.data.split('&nbsp;').join(' ');
         if (evt.data[0] === '/') {
@@ -47,8 +62,17 @@ export class ConnectionService {
       };
       this.ws.onopen = () => {
         console.log('connected');
-        this.ws.send('/sn ' +  window.prompt('Mi legyen a neved?'));
-        // this.ws.send('/sn ' +  3);
+        const dialogRef = this.dialog.open(PromptComponent, {
+          width: '260px',
+          data: {name: ''},
+          disableClose: true
+        });
+        dialogRef.afterClosed().subscribe(result => {
+          this.ws.send('/sn ' +  result);
+
+        });
+
       };
+
   }
 }
