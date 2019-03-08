@@ -1,8 +1,8 @@
 import { Component, OnInit, HostListener } from '@angular/core';
 import * as THREE from 'three';
-import { ConnectionService } from '../connection.service';
 import { SnowParticle } from '../snow-particle';
-
+import * as leap from '../leapjs/index.js';
+import * as Hand from '../leap/Hand';
 @Component({
   selector: 'app-game',
   templateUrl: './game.component.html',
@@ -11,8 +11,7 @@ import { SnowParticle } from '../snow-particle';
 export class GameComponent implements OnInit {
 
   constructor() { }
-  scale = 40;
-
+  scale = 0.4;
   centerMessage = 'Press SPACE to start the game.';
   startTime: any;
   get gameTimeGetter() {
@@ -28,7 +27,7 @@ export class GameComponent implements OnInit {
 
   renderer = new THREE.WebGLRenderer();
   scene = new THREE.Scene();
-  camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
+  camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 100000 );
   controls = {enabled: false};
   pitchObject = new THREE.Object3D();
   yawObject = new THREE.Object3D();
@@ -48,20 +47,31 @@ export class GameComponent implements OnInit {
   t = false;
   snowParticles = [];
 
+  plane;
+
+  hand;
+  hand2;
+  grabZ = 0;
+
   ngOnInit() {
+
     for (let i = 0; i < 1000; i++) {
       const particle = new SnowParticle( this.snowMaterial);
-      particle.position.x = Math.random() * 200 - 100;
-      particle.position.y = Math.random() * 400 + 2;
-      particle.position.z = Math.random() * 200 - 100;
-      particle.scale.x = particle.scale.y =  0.4;
+      particle.position.x = Math.random() * 20000 - 10000;
+      particle.position.y = Math.random() * 40000 + 200;
+      particle.position.z = Math.random() * 2000 - 10000;
+      particle.scale.x = particle.scale.y =  40;
       this.scene.add( particle );
 
       this.snowParticles.push(particle);
+
     }
+
+
+
     this.scene.background = new THREE.Color( 0x5195c2 );
 
-    this.camera.position.set(0, -0.5, 4);
+    this.camera.position.set(0, 100, 600);
     this.renderer.shadowMap.enabled = this.shadow;
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap; // default THREE.PCFShadowMap
     this.renderer.setSize( window.innerWidth, window.innerHeight );
@@ -78,18 +88,19 @@ export class GameComponent implements OnInit {
     ambient.shadow.mapSize.height = this.shadowMapSize;
     this.scene.add( ambient );
 
-    const geometry = new THREE.PlaneGeometry( 5, 5, 32 );
+    const geometry = new THREE.PlaneGeometry( 500, 500, 32 );
     this.islandImage.magFilter = THREE.NearestFilter;
     this.islandImage.minFilter = THREE.NearestFilter;
     const material = new THREE.MeshBasicMaterial( {map: this.islandImage, transparent: true, side: THREE.DoubleSide} );
-    const plane = new THREE.Mesh( geometry, material );
-    plane.rotation.x = Math.PI / 2;
-    this.scene.add( plane );
+    this.plane = new THREE.Mesh( geometry, material );
+    this.plane.rotation.x = Math.PI / 2;
+    this.plane.position.y = 100;
+    this.scene.add( this.plane );
 
-    const waterGeometry = new THREE.PlaneGeometry( 500, 500, 32 );
+    const waterGeometry = new THREE.PlaneGeometry( 50000, 50000, 32 );
     const waterMat = new THREE.MeshBasicMaterial( {color: 0x4185b2, side: THREE.DoubleSide} );
     const water = new THREE.Mesh( waterGeometry, waterMat );
-    water.position.y = -0.1;
+    water.position.y = -1.1;
     water.rotation.x = Math.PI / 2;
     this.scene.add( water );
 
@@ -102,6 +113,50 @@ export class GameComponent implements OnInit {
     this.yawObject.add( this.pitchObject );
     this.scene.add( this.yawObject );
 
+    const handMat = new THREE.MeshStandardMaterial( {
+      emissive: 0xaa0000
+    });
+    const hand2Mat = new THREE.MeshStandardMaterial( {
+      emissive: 0x0000aa
+    });
+
+    this.hand = new Hand(hand2Mat);
+    this.hand.material = waterMat;
+    this.hand2 = new Hand(handMat);
+
+    this.scene.add(this.hand);
+    this.scene.add(this.hand2);
+
+    leap.loop((frame) => {
+      if (frame.hands.length > 0) {
+
+        if (frame.hands[0].type === 'left') {
+          this.hand.leapUpdate(frame.hands[0]);
+
+        } else {
+          this.hand2.leapUpdate(frame.hands[0]);
+        }
+      }
+      if (frame.hands.length > 1) {
+        if (frame.hands[0].grabStrength == 1 && frame.hands[1].grabStrength == 1) {
+          const diff = Math.atan2(frame.hands[0].palmPosition[2], frame.hands[0].palmPosition[0]) - this.grabZ;
+          if (this.grabZ) {
+            this.onMouseMove({tomi: diff * -1000});
+          }
+          this.grabZ = Math.atan2(frame.hands[0].palmPosition[2], frame.hands[0].palmPosition[0]);
+        } else {
+          this.grabZ = null;
+        }
+
+
+
+        if (frame.hands[0].type === 'left') {
+          this.hand2.leapUpdate(frame.hands[1]);
+        } else {
+          this.hand.leapUpdate(frame.hands[1]);
+        }
+      }
+    });
     this.animate();
   }
 
@@ -169,14 +224,14 @@ export class GameComponent implements OnInit {
   @HostListener('document:mousemove', ['$event'])
   onMouseMove = (event) => {
     if ( this.controls.enabled === false ) {
-      return;
+//      return;
     }
 
-    const movementX = event.movementX || event.mozMovementX || event.webkitMovementX || this.jox || 0;
+    const movementX = event.tomi || event.movementX || event.mozMovementX || event.webkitMovementX || this.jox || 0;
     const movementY = 0; // event.movementY || event.mozMovementY || event.webkitMovementY || this.joy || 0;
 
-    this.yawObject.rotation.y -= movementX * 0.002;
-    this.pitchObject.rotation.x -= movementY * 0.002;
+    this.plane.rotation.z -= movementX * 0.002;
+    // this.plane.rotation.x -= movementY * 0.002;
     const PI_2 = Math.PI / 2;
     this.pitchObject.rotation.x = Math.max( - PI_2, Math.min( PI_2, this.pitchObject.rotation.x ) );
   }

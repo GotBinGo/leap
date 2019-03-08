@@ -7,13 +7,11 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule, MatCardModule, MatSidenavModule, MatInputModule, MatIconModule, MatChipsModule, MatFormFieldModule, MatDialogModule } from '@angular/material';
 import { GameComponent } from './game/game.component';
 import { RouterModule } from '@angular/router';
-import { PromptComponent } from './connection.service';
 
 @NgModule({
   declarations: [
     AppComponent,
     GameComponent,
-    PromptComponent,
   ],
   imports: [
     FormsModule,
@@ -34,6 +32,5 @@ import { PromptComponent } from './connection.service';
   ],
   providers: [],
   bootstrap: [AppComponent],
-  entryComponents: [PromptComponent]
 })
 export class AppModule { }

@@ -1,5 +1,4 @@
 import { Component } from '@angular/core';
-import { ConnectionService } from './connection.service';
 import { FormControl, Validators } from '@angular/forms';
 
 @Component({
@@ -13,8 +12,8 @@ export class AppComponent {
   placeholder = '';
   color = 'primary';
 
-  constructor(private cs: ConnectionService) {
-    cs.onMessage.subscribe(this.onMessage);
+  constructor() {
+    // cs.onMessage.subscribe(this.onMessage);
   }
 
   onMessage = (m) => {
@@ -33,7 +32,7 @@ export class AppComponent {
 
   send = () => {
 
-    this.cs.ws.send(this.chatInput.value);
+    // this.cs.ws.send(this.chatInput.value);
     this.chatInput.setValue('');
     console.log(scroll);
     setTimeout(() => {document.getElementById('scroll').scrollTo(0, 999999999); });
