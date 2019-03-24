@@ -5,6 +5,7 @@ import * as leap from '../leapjs/index.js';
 import * as Hand from '../leap/Hand';
 import { Vector3 } from 'three';
 import { TextureAnimator } from '../texture-animation';
+import { Human } from '../human';
 @Component({
   selector: 'app-game',
   templateUrl: './game.component.html',
@@ -37,14 +38,13 @@ export class GameComponent implements OnInit {
   time = Date.now();
   keys = [false, false, false, false];
 
-  /*kockaObject;
-  objLoader = new THREE.OBJLoader();*/
-
   loader = new THREE.TextureLoader();
-  emberImage = this.loader.load('assets/ember.png');
   particleImage = this.loader.load('assets/particle.png');
   islandImage = this.loader.load('assets/island.png');
+  runnerTexture = this.loader.load('assets/run2.png');
+  buildTexture = this.loader.load('assets/build2.png');
 
+  raycaster = new THREE.Raycaster();
 
   snowMaterial = new THREE.SpriteMaterial( { map: this.particleImage, transparent: true, side: THREE.DoubleSide} );
 
@@ -62,13 +62,13 @@ export class GameComponent implements OnInit {
   vonalGeometry;
   vonalMaterial;
   annie;
+  buildannie;
 
   hand;
   hand2;
   grabZ = 0;
 
   ngOnInit() {
-
     for (let i = 0; i < 1000; i++) {
       const particle = new SnowParticle( this.snowMaterial);
       particle.position.x = Math.random() * 20000 - 10000;
@@ -78,28 +78,13 @@ export class GameComponent implements OnInit {
       this.scene.add( particle );
 
       this.snowParticles.push(particle);
-
     }
-
-
-    /*this.objLoader.load('assets/rubics/cube.obj', function(obj) {
-      this.kockaObject = obj;
-      this.kockaObject.position.y = -95;
-      this.kockaObject.position.x = 0;
-    }, function() {
-      console.log('callb');
-    }, function(e) {
-      console.log('err' + e);
-    });*/
-
-
-    // this.scene.add(this.kockaObject);
 
     this.scene.background = new THREE.Color( 0x5195c2 );
 
     this.camera.position.set(0, 150, 600);
     this.renderer.shadowMap.enabled = this.shadow;
-    this.renderer.shadowMap.type = THREE.PCFSoftShadowMap; // default THREE.PCFShadowMap
+    this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     this.renderer.setSize( window.innerWidth, window.innerHeight );
     const cand = document.getElementById( 'cand' );
     cand.appendChild( this.renderer.domElement );
@@ -114,55 +99,56 @@ export class GameComponent implements OnInit {
     ambient.shadow.mapSize.height = this.shadowMapSize;
     this.scene.add( ambient );
 
-
-    const emberGeometry = new THREE.PlaneGeometry( 15, 30, 32);
-    this.emberImage.minFilter = THREE.NearestFilter;
-    this.emberImage.magFilter = THREE.NearestFilter;
-    const emberMaterial = new THREE.MeshBasicMaterial( {map: this.emberImage, transparent: true, side: THREE.DoubleSide} );
-
     const geometry = new THREE.PlaneGeometry( 500, 500, 32 );
     this.islandImage.magFilter = THREE.NearestFilter;
     this.islandImage.minFilter = THREE.NearestFilter;
-    const material = new THREE.MeshBasicMaterial( {map: this.islandImage, transparent: true, side: THREE.DoubleSide} );
-    this.plane = new THREE.Mesh( geometry, material );
+    const material = new THREE.MeshBasicMaterial( {map: this.islandImage, transparent: true, side: THREE.DoubleSide});
+    this.plane = new THREE.Mesh(geometry, material );
     this.plane.rotation.x = Math.PI / 2;
-    this.plane.position.y = 200;
+    this.plane.position.y = 100;
+    // this.plane.rotation.z = Math.PI / 2;
+    // const emberGeometry = new THREE.PlaneGeometry( 20, 25, 32);
+    const emberMaterial = new THREE.SpriteMaterial( {alphaTest: 0.5, map: this.runnerTexture, side: THREE.DoubleSide});
+    const buildMaterial = new THREE.SpriteMaterial( {alphaTest: 0.5, map: this.buildTexture, transparent: true, side: THREE.DoubleSide});
 
-    for ( let i = 0; i < 20; i++) {
-      const emb = new THREE.Mesh( emberGeometry, emberMaterial );
-      emb.position.y = -150 + Math.floor(Math.random() * 300);
-      emb.position.x = -150 + Math.floor(Math.random() * 300);
-      emb.position.z = -25;
-      const axis = new THREE.Vector3(1, 0, 0);
-      emb.rotateOnAxis(axis, -Math.PI / 2);
+
+    const build = new THREE.Particle(buildMaterial);
+    build.position.y = 170 * Math.random();
+    build.position.z = -15;
+    build.scale.x = 12 * 2;
+    build.scale.y = 15 * 2;
+    const buildaxis = new THREE.Vector3(0, 0, 1);
+    build.position.applyAxisAngle(buildaxis, Math.random() * Math.PI * 2);
+    this.plane.add(build);
+
+    for ( let i = 0; i < 1; i++) {
+      const emb = new Human(emberMaterial);
       this.emberPlanek.push(emb);
-      this.plane.add( emb);
+      this.plane.add(emb);
     }
+    this.scene.add(this.plane);
 
     this.vonalGeometry = new THREE.Geometry();
     this.vonalMaterial = new THREE.LineBasicMaterial( { color: 0xff0000, linewidth: 30} );
     this.vonalGeometry.vertices.push(new THREE.Vector3( 0, 0, 0) );
-    this.vonalGeometry.vertices.push(new THREE.Vector3( 0, 200, 0) );
+    this.vonalGeometry.vertices.push(new THREE.Vector3( 0, 20, 0) );
     this.ujjLine = new THREE.Line( this.vonalGeometry, this.vonalMaterial );
     this.scene.add(this.ujjLine);
 
-    const emberPlane = new THREE.Mesh( emberGeometry, emberMaterial );
-    emberPlane.position.y = 200;
-    emberPlane.position.x = 0;
-    emberPlane.position.z = 0;
-    // const axis = new THREE.Vector3(1, 0, 0);
-    // emberPlane.rotateOnAxis(axis, -Math.PI / 2);
-    this.scene.add( emberPlane);
+    // const emberPlane = new THREE.Mesh( emberGeometry, emberMaterial );
+    // emberPlane.position.y = 200;
+    // emberPlane.position.x = 0;
+    // emberPlane.position.z = 0;
+    // this.scene.add( emberPlane);
 
 
-    this.scene.add( this.plane );
 
     const waterGeometry = new THREE.PlaneGeometry( 50000, 50000, 32 );
     const waterMat = new THREE.MeshBasicMaterial( {color: 0x4185b2, side: THREE.DoubleSide} );
     const water = new THREE.Mesh( waterGeometry, waterMat );
     water.position.y = -1.1;
     water.rotation.x = Math.PI / 2;
-    this.scene.add( water );
+    // this.scene.add( water );
 
     this.pitchObject = new THREE.Object3D();
     this.pitchObject.rotation.x = -0.5;
@@ -187,16 +173,22 @@ export class GameComponent implements OnInit {
     this.scene.add(this.hand);
     this.scene.add(this.hand2);
 
-    const runnerTexture = this.loader.load('assets/run.png');
-    this.annie = new TextureAnimator( runnerTexture, 10, 1, 10, 75 ); // texture, #horiz, #vert, #total, duration.
-    const runnerMaterial = new THREE.MeshBasicMaterial( { map: runnerTexture, side: THREE.DoubleSide } );
-    const runnerGeometry = new THREE.PlaneGeometry(50, 50, 1, 1);
-    const runner = new THREE.Mesh(runnerGeometry, runnerMaterial);
-    runner.position.set(0, 250, 0);
-    this.scene.add(runner);
+
+    this.runnerTexture.minFilter = THREE.NearestFilter;
+    this.runnerTexture.magFilter = THREE.NearestFilter;
+    this.annie = new TextureAnimator(this.runnerTexture, 4, 1, false, 75 );
+
+    this.buildTexture.magFilter = THREE.NearestFilter;
+    this.buildTexture.minFilter = THREE.NearestFilter;
+    this.buildannie = new TextureAnimator(this.buildTexture, 1, 6, true, 75 );
+
 
 
     leap.loop((frame) => {
+      for (let i = 0; i < this.emberPlanek.length; i++) {
+        this.emberPlanek[i].move();
+      }
+
       if (frame.hands.length > 0) {
         if (frame.hands[0].type === 'left') {
           this.hand.leapUpdate(frame.hands[0]);
@@ -204,77 +196,55 @@ export class GameComponent implements OnInit {
         } else {
           this.hand2.leapUpdate(frame.hands[0]);
         }
-        if (frame.hands[0].pinchStrength > 0.9) {
-          emberPlane.position.x = frame.hands[0].thumb.dipPosition[0];
-          emberPlane.position.y = frame.hands[0].thumb.dipPosition[1] - 25; // 200;
-          emberPlane.position.z = frame.hands[0].thumb.dipPosition[2];
+        if (frame.hands[0].pinchStrength > 0.9 || true) {
+          const inter = this.raycaster.intersectObject(this.plane, false);
+          if (inter.length) {
+            for (let i = 0; i < this.emberPlanek.length; i++) {
+              // let vector = new THREE.Vector3(inter[0].point.x, inter[0].point.z, 0);
+              const vector = new THREE.Vector3(inter[0].point.x, inter[0].point.z, 0);
+              const axis = new THREE.Vector3( 0, 0, 1 );
+              const angle = this.plane.rotation.z;
+              vector.applyAxisAngle(axis, -angle);
+              this.emberPlanek[i].setCenter(vector);
+              // this.emberPlanek[i].position.set(vector.x, vector.y, vector.z);
+            }
+          }
         }
 
-       /* this.vonalGeometry.vertices[0].x = frame.hands[0].indexFinger.dipPosition[0];
-        this.vonalGeometry.vertices[0].y = frame.hands[0].indexFinger.dipPosition[1];
-        this.vonalGeometry.vertices[0].z = frame.hands[0].indexFinger.dipPosition[2];
-
-        this.vonalGeometry.vertices[1].x = frame.hands[0].indexFinger.bones[3].basis[2][0] * 300;
-        this.vonalGeometry.vertices[1].y = frame.hands[0].indexFinger.bones[3].basis[2][1] * 300;
-        this.vonalGeometry.vertices[1].z = frame.hands[0].indexFinger.bones[3].basis[2][2] * 300;*/
-
-       /* const dx = frame.hands[0].indexFinger.bones[3].nextJoint[0] - frame.hands[0].indexFinger.bones[3].prevJoint[0];
-        const dy = frame.hands[0].indexFinger.bones[3].nextJoint[1] - frame.hands[0].indexFinger.bones[3].prevJoint[1];
-        const dz = frame.hands[0].indexFinger.bones[3].nextJoint[2] - frame.hands[0].indexFinger.bones[3].prevJoint[2];
-        if(Math.random()<0.1){
-          console.log(frame.hands[0]);
-        }
-
-
-        this.vonalGeometry.vertices[0].x = frame.hands[0].indexFinger.bones[3].prevJoint[0];
-        this.vonalGeometry.vertices[0].y = frame.hands[0].indexFinger.bones[3].prevJoint[1];
-        this.vonalGeometry.vertices[0].z = frame.hands[0].indexFinger.bones[3].prevJoint[2];
-
-        this.vonalGeometry.vertices[1].x = frame.hands[0].indexFinger.bones[3].prevJoint[0] + 100 * dx;
-        this.vonalGeometry.vertices[1].y = frame.hands[0].indexFinger.bones[3].prevJoint[1] + 100 * dy;
-        this.vonalGeometry.vertices[1].z = frame.hands[0].indexFinger.bones[3].prevJoint[2] + 100 * dz;*/
 
 
         let dx = frame.hands[0].indexFinger.bones[3].nextJoint[0] - frame.hands[0].indexFinger.bones[3].prevJoint[0];
         let dy = frame.hands[0].indexFinger.bones[3].nextJoint[1] - frame.hands[0].indexFinger.bones[3].prevJoint[1];
         let dz = frame.hands[0].indexFinger.bones[3].nextJoint[2] - frame.hands[0].indexFinger.bones[3].prevJoint[2];
         const a = frame.hands[0].indexFinger.direction;
-        console.log(a, dx, dy, dz);
+
         dx = a[0];
         dy = a[1];
         dz = a[2];
-
+        const norm = new THREE.Vector3(dx, dy, dz).normalize().multiplyScalar(1000);
 
         this.vonalGeometry.vertices[0].x = frame.hands[0].indexFinger.bones[3].nextJoint[0];
         this.vonalGeometry.vertices[0].y = frame.hands[0].indexFinger.bones[3].nextJoint[1];
         this.vonalGeometry.vertices[0].z = frame.hands[0].indexFinger.bones[3].nextJoint[2];
 
-        this.vonalGeometry.vertices[1].x = dx * 1000;
-        this.vonalGeometry.vertices[1].y = dy * 1000;
-        this.vonalGeometry.vertices[1].z = dz * 1000;
-
+        this.vonalGeometry.vertices[1].x = frame.hands[0].indexFinger.bones[3].nextJoint[0] + norm.x;
+        this.vonalGeometry.vertices[1].y = frame.hands[0].indexFinger.bones[3].nextJoint[1] + norm.y;
+        this.vonalGeometry.vertices[1].z = frame.hands[0].indexFinger.bones[3].nextJoint[2] + norm.z;
 
         this.vonalGeometry.verticesNeedUpdate = true;
 
-      /*  const ujjak = frame.hands[0].fingers[1].distal.basis;
-        for (let i = 0; i < ujjak.length; i++) {
-           // console.log(ujjak[i][0] + ' ' + ujjak[i][1] + ' ' + ujjak[i][2] );
-        }
-        //console.log(ujjak);
-        console.log(' ');*/
+        this.raycaster.set(this.vonalGeometry.vertices[0], norm.normalize());
       }
       if (frame.hands.length > 1) {
         if (frame.hands[0].grabStrength === 1 && frame.hands[1].grabStrength === 1) {
           const diff = Math.atan2(frame.hands[0].palmPosition[2], frame.hands[0].palmPosition[0]) - this.grabZ;
           if (this.grabZ) {
-            this.onMouseMove({tomi: diff * -1000});
+            this.onMouseMove({tomi: diff});
           }
           this.grabZ = Math.atan2(frame.hands[0].palmPosition[2], frame.hands[0].palmPosition[0]);
         } else {
           this.grabZ = null;
         }
-
-
 
         if (frame.hands[0].type === 'left') {
           this.hand2.leapUpdate(frame.hands[1]);
@@ -298,6 +268,7 @@ export class GameComponent implements OnInit {
       }
     }
     this.annie.update(5);
+    this.buildannie.update(1);
     requestAnimationFrame(this.animate);
     this.renderer.render( this.scene, this.camera );
 
@@ -353,14 +324,20 @@ export class GameComponent implements OnInit {
 //      return;
     }
 
-    const movementX = event.tomi || event.movementX || event.mozMovementX || event.webkitMovementX || this.jox || 0;
+    const movementX = event.tomi || 0; // || event.movementX || event.mozMovementX || event.webkitMovementX || this.jox || 0;
     const movementY = 0; // event.movementY || event.mozMovementY || event.webkitMovementY || this.joy || 0;
 
-    this.plane.rotation.z -= movementX * 0.002;
+    this.plane.rotation.z += movementX * 2;
 
-    for (let i = 0; i < this.emberPlanek.length; i++) {
-      this.emberPlanek[i].rotation.y -= movementX * 0.002;
-    }
+    // if (this.plane.rotation.z > Math.PI * 2) {
+    //   this.plane.rotation.z = this.plane.rotation.z - Math.PI * 2;
+    // }
+    console.log(this.plane.rotation.z);
+
+
+    // for (let i = 0; i < this.emberPlanek.length; i++) {
+    //   this.emberPlanek[i].rotation.y -= movementX * 0.002;
+    // }
     const PI_2 = Math.PI / 2;
     this.pitchObject.rotation.x = Math.max( - PI_2, Math.min( PI_2, this.pitchObject.rotation.x ) );
   }

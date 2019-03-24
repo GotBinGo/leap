@@ -8,8 +8,9 @@ export class TextureAnimator  {
     currentDisplayTime;
     currentTile;
     texture;
+    backwards;
 
-    constructor(texture, tilesHoriz, tilesVert, numTiles, tileDispDuration) {
+    constructor(texture, tilesHoriz, tilesVert, backwards, tileDispDuration) {
         this.tilesHorizontal = tilesHoriz;
         this.tilesVertical = tilesVert;
         texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
@@ -18,6 +19,7 @@ export class TextureAnimator  {
         this.currentDisplayTime = 0;
         this.currentTile = 0;
         this.texture = texture;
+        this.backwards = backwards;
     }
 
     update ( milliSec ) {
@@ -30,7 +32,7 @@ export class TextureAnimator  {
             }
             const currentColumn = this.currentTile % this.tilesHorizontal;
             this.texture.offset.x = currentColumn / this.tilesHorizontal;
-            const currentRow = Math.floor( this.currentTile / this.tilesHorizontal );
+            const currentRow = this.tilesHorizontal - Math.floor( this.currentTile / this.tilesHorizontal );
             this.texture.offset.y = currentRow / this.tilesVertical;
         }
     }
