@@ -10,6 +10,7 @@ import { Building } from '../bulding';
 import { Tree } from '../tree';
 import { Data } from '../Data';
 import { Tower } from '../tower';
+import { Stone } from '../stone';
 @Component({
   selector: 'app-game',
   templateUrl: './game.component.html',
@@ -47,6 +48,7 @@ export class GameComponent implements OnInit {
   islandImage = this.loader.load('assets/island.png');
   runnerTexture = this.loader.load('assets/run2.png');
   treeTexture = this.loader.load('assets/tree.png');
+  stoneTexture = this.loader.load('assets/stone2.png');
   towerTexture = this.loader.load('assets/tower.png');
   buildTexture = 'assets/build2.png';
 
@@ -70,6 +72,7 @@ export class GameComponent implements OnInit {
   annie;
   buildings = [];
   trees = [];
+  stones = [];
 
   hand;
   hand2;
@@ -128,12 +131,13 @@ export class GameComponent implements OnInit {
     this.plane.add(this.buildings[0]);
     this.buildings[0].position.y = 20;
     this.buildings[0].position.x = 40;
-    this.buildings.push(new Building(this.loader.load(this.buildTexture)));
+    this.buildings.push(new Building(this.loader.load(this.buildTexture), true));
     this.plane.add(this.buildings[1]);
     this.buildings[1].position.y = 200;
 
     for ( let i = 0; i < Data.trees.length; i++) {
-      this.trees.push(new Tree(this.treeTexture));
+      this.trees.push(new Stone(this.stoneTexture));
+      // this.trees.push(new Tree(this.treeTexture));
       this.trees[this.trees.length - 1].position.x = Data.trees[i].x;
       this.trees[this.trees.length - 1].position.y = Data.trees[i].y;
       this.plane.add(this.trees[this.trees.length - 1]);
@@ -273,10 +277,10 @@ export class GameComponent implements OnInit {
             vector.applyAxisAngle(axis, -angle);
 
             if (Math.random() < 1) {
-              this.trees.push(new Tree(this.treeTexture));
-              this.trees[this.trees.length - 1].position.x = vector.x + (Math.random() - 0.5) * 30;
-              this.trees[this.trees.length - 1].position.y = vector.y + (Math.random() - 0.5) * 30;
-              this.plane.add(this.trees[this.trees.length - 1]);
+              this.stones.push(new Stone(this.stoneTexture));
+              this.stones[this.stones.length - 1].position.x = vector.x + (Math.random() - 0.5) * 30;
+              this.stones[this.stones.length - 1].position.y = vector.y + (Math.random() - 0.5) * 30;
+              this.plane.add(this.stones[this.stones.length - 1]);
             }
           }
         }
@@ -353,7 +357,7 @@ export class GameComponent implements OnInit {
 //      return;
     }
 
-    const movementX = event.tomi || 0; // || event.movementX || event.mozMovementX || event.webkitMovementX || this.jox || 0;
+    const movementX = event.tomi || (event.movementX || event.mozMovementX || event.webkitMovementX || this.jox) * -0.02 || 0;
     const movementY = 0; // event.movementY || event.mozMovementY || event.webkitMovementY || this.joy || 0;
 
     this.plane.rotation.z += movementX * 2;

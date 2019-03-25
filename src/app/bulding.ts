@@ -10,7 +10,7 @@ export class Building extends THREE.Particle {
   greenbuild = null;
   allocated = null;
 
-  constructor(texture) {
+  constructor(texture, stone = false) {
     super(new THREE.SpriteMaterial( {alphaTest: 0.5, map: texture, transparent: true, side: THREE.DoubleSide}));
     this.position.z = -15;
     this.scale.x = 12 * 2;
@@ -19,7 +19,11 @@ export class Building extends THREE.Particle {
     texture.minFilter = THREE.NearestFilter;
     this.textureAnimator = new TextureAnimator(texture, 1, 6, true, 75 );
     // this.position.y = 170 * Math.random();
-    this.greenbuild = this.loader.load('assets/greenbuild.png');
+    if(!stone) {
+      this.greenbuild = this.loader.load('assets/greenbuild.png');
+    } else {
+      this.greenbuild = this.loader.load('assets/stonebuild.png');
+    }
     this.greenbuild.magFilter = THREE.NearestFilter;
     this.greenbuild.minFilter = THREE.NearestFilter;
     this.update(2000);
