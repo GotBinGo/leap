@@ -58,9 +58,11 @@ export class Human extends THREE.Particle {
       return;
     }
 
-    this.target = new THREE.Vector3(this.targetCenter.x + (Math.random() - 0.5) * this.newTargetRange, this.targetCenter.y + (Math.random() - 0.5) * this.newTargetRange, 0);
+    this.target = new THREE.Vector3(this.targetCenter.x + (Math.random() - 0.5) * this.newTargetRange,
+    this.targetCenter.y + (Math.random() - 0.5) * this.newTargetRange, 0);
     while (!this.goodTarget()) {
-      this.target = new THREE.Vector3(this.targetCenter.x + (Math.random() - 0.5) * this.newTargetRange, this.targetCenter.y + (Math.random() - 0.5) * this.newTargetRange, 0);
+      this.target = new THREE.Vector3(this.targetCenter.x + (Math.random() - 0.5) * this.newTargetRange,
+      this.targetCenter.y + (Math.random() - 0.5) * this.newTargetRange, 0);
     }
   }
 

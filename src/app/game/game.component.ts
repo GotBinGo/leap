@@ -33,7 +33,7 @@ export class GameComponent implements OnInit {
 
   renderer = new THREE.WebGLRenderer();
   scene = new THREE.Scene();
-  camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 100000 );
+  camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 100000 );
   controls = {enabled: false};
   pitchObject = new THREE.Object3D();
   yawObject = new THREE.Object3D();
@@ -87,7 +87,7 @@ export class GameComponent implements OnInit {
 
     this.scene.background = new THREE.Color( 0x5195c2 );
 
-    this.camera.position.set(0, 150, 600);
+    this.camera.position.set(0, 150, 700);
     this.renderer.shadowMap.enabled = this.shadow;
 
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
