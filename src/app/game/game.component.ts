@@ -63,6 +63,8 @@ export class GameComponent implements OnInit {
   t = false;
   snowParticles = [];
 
+
+
   plane;
   emberPlanek = [];
   emberPlane;
@@ -77,6 +79,13 @@ export class GameComponent implements OnInit {
   hand;
   hand2;
   grabZ = 0;
+
+  bb; // menu buildings
+  bb2;
+
+  selected = false; // which is selected
+
+  lastBuild = +new Date();
 
   ngOnInit() {
     for (let i = 0; i < 1000; i++) {
@@ -127,20 +136,26 @@ export class GameComponent implements OnInit {
       this.plane.add(emb);
     }
 
-    this.buildings.push(new Building(this.loader.load(this.buildTexture)));
-    this.plane.add(this.buildings[0]);
-    this.buildings[0].position.y = 20;
-    this.buildings[0].position.x = 40;
-    this.buildings.push(new Building(this.loader.load(this.buildTexture), true));
-    this.plane.add(this.buildings[1]);
-    this.buildings[1].position.y = 200;
+    // this.buildings.push(new Building(this.loader.load(this.buildTexture)));
+    // this.plane.add(this.buildings[0]);
+    // this.buildings[0].position.y = 20;
+    // this.buildings[0].position.x = 40;
+    // this.buildings.push(new Building(this.loader.load(this.buildTexture), true));
+    // this.plane.add(this.buildings[1]);
+    // this.buildings[1].position.y = 200;
 
     for ( let i = 0; i < Data.trees.length; i++) {
-      this.trees.push(new Stone(this.stoneTexture));
-      // this.trees.push(new Tree(this.treeTexture));
+      this.trees.push(new Tree(this.treeTexture));
       this.trees[this.trees.length - 1].position.x = Data.trees[i].x;
       this.trees[this.trees.length - 1].position.y = Data.trees[i].y;
       this.plane.add(this.trees[this.trees.length - 1]);
+    }
+
+    for ( let i = 0; i < Data.stones.length; i++) {
+      this.stones.push(new Stone(this.stoneTexture));
+      this.stones[this.stones.length - 1].position.x = Data.stones[i].x;
+      this.stones[this.stones.length - 1].position.y = Data.stones[i].y;
+      this.plane.add(this.stones[this.stones.length - 1]);
     }
 
     const tower = new Tower(this.towerTexture);
@@ -194,6 +209,26 @@ export class GameComponent implements OnInit {
     this.scene.add(this.hand);
     this.scene.add(this.hand2);
 
+    this.bb = new Building(this.loader.load(this.buildTexture));
+    this.scene.add(this.bb);
+    this.bb.position.x = -40;
+    this.bb.position.y = 440;
+    this.bb.position.z = 400;
+    this.bb.update(2400);
+    this.bb.update(1);
+    this.bb.done = true;
+    this.bb.visible = false;
+
+    this.bb2 = new Building(this.loader.load(this.buildTexture), true);
+    this.scene.add(this.bb2);
+    this.bb2.position.x = 40;
+    this.bb2.position.y = 440;
+    this.bb2.position.z = 400;
+    this.bb2.update(2400);
+    this.bb2.update(1);
+    this.bb2.done = true;
+    this.bb2.visible = false;
+
 
     this.runnerTexture.minFilter = THREE.NearestFilter;
     this.runnerTexture.magFilter = THREE.NearestFilter;
@@ -204,8 +239,24 @@ export class GameComponent implements OnInit {
     leap.loop((frame) => {
 
       if (frame.hands.length === 0) {
-        console.log(JSON.stringify(this.trees.map(x => ({x: x.position.x, y: x.position.y}))));
+        // console.log(JSON.stringify(this.stones.map(x => ({x: x.position.x, y: x.position.y}))));
       } else if (frame.hands.length > 0) {
+        if (frame.hands[0].palmNormal[1] > 0.8) {
+          this.bb.visible = true;
+          this.bb2.visible = true;
+        } else {
+          if (this.bb.visible === true && this.bb2.visible === true) {
+            if (frame.hands[0].palmPosition[0] > 0) {
+              this.selected = true;
+            } else {
+              this.selected = false;
+            }
+          }
+
+          this.bb.visible = false;
+          this.bb2.visible = false;
+        }
+
         if (frame.hands[0].type === 'left') {
           this.hand.leapUpdate(frame.hands[0]);
 
@@ -266,7 +317,7 @@ export class GameComponent implements OnInit {
           this.hand.leapUpdate(frame.hands[1]);
         }
 
-        if (frame.hands[1].pinchStrength > 0.99) {
+        if (frame.hands[1].pinchStrength > 0.99 ) {
           const inter = this.raycaster.intersectObject(this.plane, false);
           if (inter.length) {
             const vector = new THREE.Vector3(inter[0].point.x, inter[0].point.z, 0);
@@ -274,11 +325,20 @@ export class GameComponent implements OnInit {
             const angle = this.plane.rotation.z;
             vector.applyAxisAngle(axis, -angle);
 
-            if (Math.random() < 1) {
-              this.stones.push(new Stone(this.stoneTexture));
-              this.stones[this.stones.length - 1].position.x = vector.x + (Math.random() - 0.5) * 30;
-              this.stones[this.stones.length - 1].position.y = vector.y + (Math.random() - 0.5) * 30;
-              this.plane.add(this.stones[this.stones.length - 1]);
+            const buildTime = +new Date();
+
+            if (buildTime - this.lastBuild > 1000) {
+              this.lastBuild = buildTime;
+              // this.stones.push(new Stone(this.stoneTexture));
+              // this.stones[this.stones.length - 1].position.x =  + (Math.random() - 0.5) * 30;
+              // this.stones[this.stones.length - 1].position.y = vector.y + (Math.random() - 0.5) * 30;
+              // this.plane.add(this.stones[this.stones.length - 1]);
+              this.buildings.push(new Building(this.loader.load(this.buildTexture), this.selected));
+              console.log(this.buildings);
+              this.plane.add(this.buildings[this.buildings.length - 1]);
+              this.buildings[this.buildings.length - 1].position.x = vector.x;
+              this.buildings[this.buildings.length - 1].position.y = vector.y;
+
             }
           }
         }

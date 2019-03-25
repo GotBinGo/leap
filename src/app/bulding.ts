@@ -19,7 +19,7 @@ export class Building extends THREE.Particle {
     texture.minFilter = THREE.NearestFilter;
     this.textureAnimator = new TextureAnimator(texture, 1, 6, true, 75 );
     // this.position.y = 170 * Math.random();
-    if(!stone) {
+    if (!stone) {
       this.greenbuild = this.loader.load('assets/greenbuild.png');
     } else {
       this.greenbuild = this.loader.load('assets/stonebuild.png');
