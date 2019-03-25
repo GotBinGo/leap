@@ -359,7 +359,7 @@ export class GameComponent implements OnInit {
 
             const buildTime = +new Date();
 
-            if (buildTime - this.lastBuild > 1000 && this.selected !== null) {
+            if (buildTime - this.lastBuild > 3000 && this.selected !== null) {
               this.lastBuild = buildTime;
               // this.stones.push(new Stone(this.stoneTexture));
               // this.stones[this.stones.length - 1].position.x =  + (Math.random() - 0.5) * 30;
