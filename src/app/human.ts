@@ -1,12 +1,20 @@
 import * as THREE from 'three';
+import { Building } from './bulding';
 
 export class Human extends THREE.Particle {
+  static sid = 0;
   target;
   targetCenter;
   newTargetRange = 50;
+  buildings: Building[];
+  rot;
+  uid = null;
 
-  constructor(material) {
+  constructor(material, buildings, rot) {
     super(material);
+    this.uid = Human.sid++;
+    this.buildings = buildings;
+    this.rot = rot;
     this.position.x = 0;
     this.position.y = 150;
     this.position.z = -5;
@@ -31,7 +39,21 @@ export class Human extends THREE.Particle {
   }
 
   newTarget = (a) => {
+    for (const b of this.buildings) {
+      if (!b.done && b.allocated === null) {
+        b.allocated = this.uid;
+      }
+
+      if (!b.done && b.allocated === this.uid) {
+        a = new THREE.Vector3().copy(b.position);
+        b.update(1);
+        break;
+      }
+    }
+
     if (a) {
+      a.y += Math.cos(this.rot.z) * 10;
+      a.x += Math.sin(this.rot.z) * 10;
       this.target = a;
       return;
     }

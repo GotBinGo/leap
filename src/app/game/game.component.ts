@@ -6,6 +6,7 @@ import * as Hand from '../leap/Hand';
 import { Vector3 } from 'three';
 import { TextureAnimator } from '../texture-animation';
 import { Human } from '../human';
+import { Building } from '../bulding';
 @Component({
   selector: 'app-game',
   templateUrl: './game.component.html',
@@ -42,7 +43,7 @@ export class GameComponent implements OnInit {
   particleImage = this.loader.load('assets/particle.png');
   islandImage = this.loader.load('assets/island.png');
   runnerTexture = this.loader.load('assets/run2.png');
-  buildTexture = this.loader.load('assets/build2.png');
+  buildTexture = 'assets/build2.png';
 
   raycaster = new THREE.Raycaster();
 
@@ -62,7 +63,7 @@ export class GameComponent implements OnInit {
   vonalGeometry;
   vonalMaterial;
   annie;
-  buildannie;
+  buildings = [];
 
   hand;
   hand2;
@@ -84,6 +85,7 @@ export class GameComponent implements OnInit {
 
     this.camera.position.set(0, 150, 600);
     this.renderer.shadowMap.enabled = this.shadow;
+
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     this.renderer.setSize( window.innerWidth, window.innerHeight );
     const cand = document.getElementById( 'cand' );
@@ -109,23 +111,20 @@ export class GameComponent implements OnInit {
     // this.plane.rotation.z = Math.PI / 2;
     // const emberGeometry = new THREE.PlaneGeometry( 20, 25, 32);
     const emberMaterial = new THREE.SpriteMaterial( {alphaTest: 0.5, map: this.runnerTexture, side: THREE.DoubleSide});
-    const buildMaterial = new THREE.SpriteMaterial( {alphaTest: 0.5, map: this.buildTexture, transparent: true, side: THREE.DoubleSide});
 
-
-    const build = new THREE.Particle(buildMaterial);
-    build.position.y = 170 * Math.random();
-    build.position.z = -15;
-    build.scale.x = 12 * 2;
-    build.scale.y = 15 * 2;
-    const buildaxis = new THREE.Vector3(0, 0, 1);
-    build.position.applyAxisAngle(buildaxis, Math.random() * Math.PI * 2);
-    this.plane.add(build);
-
-    for ( let i = 0; i < 1; i++) {
-      const emb = new Human(emberMaterial);
+    for ( let i = 0; i < 2; i++) {
+      const emb = new Human(emberMaterial, this.buildings, this.plane.rotation);
       this.emberPlanek.push(emb);
       this.plane.add(emb);
     }
+
+    this.buildings.push(new Building(this.loader.load(this.buildTexture)));
+    this.plane.add(this.buildings[0]);
+    this.buildings[0].position.y = -100;
+    this.buildings.push(new Building(this.loader.load(this.buildTexture)));
+    this.plane.add(this.buildings[1]);
+    this.buildings[1].position.y = 100;
+
     this.scene.add(this.plane);
 
     this.vonalGeometry = new THREE.Geometry();
@@ -177,10 +176,6 @@ export class GameComponent implements OnInit {
     this.runnerTexture.minFilter = THREE.NearestFilter;
     this.runnerTexture.magFilter = THREE.NearestFilter;
     this.annie = new TextureAnimator(this.runnerTexture, 4, 1, false, 75 );
-
-    this.buildTexture.magFilter = THREE.NearestFilter;
-    this.buildTexture.minFilter = THREE.NearestFilter;
-    this.buildannie = new TextureAnimator(this.buildTexture, 1, 6, true, 75 );
 
 
 
@@ -268,7 +263,7 @@ export class GameComponent implements OnInit {
       }
     }
     this.annie.update(5);
-    this.buildannie.update(1);
+
     requestAnimationFrame(this.animate);
     this.renderer.render( this.scene, this.camera );
 
@@ -332,7 +327,7 @@ export class GameComponent implements OnInit {
     // if (this.plane.rotation.z > Math.PI * 2) {
     //   this.plane.rotation.z = this.plane.rotation.z - Math.PI * 2;
     // }
-    console.log(this.plane.rotation.z);
+    // console.log(this.plane.rotation.z);
 
 
     // for (let i = 0; i < this.emberPlanek.length; i++) {
