@@ -202,9 +202,7 @@ export class GameComponent implements OnInit {
 
 
     leap.loop((frame) => {
-      for (let i = 0; i < this.emberPlanek.length; i++) {
-        this.emberPlanek[i].move();
-      }
+
       if (frame.hands.length === 0) {
         console.log(JSON.stringify(this.trees.map(x => ({x: x.position.x, y: x.position.y}))));
       } else if (frame.hands.length > 0) {
@@ -300,6 +298,11 @@ export class GameComponent implements OnInit {
         this.onMouseMove({});
       }
     }
+
+    for (let i = 0; i < this.emberPlanek.length; i++) {
+      this.emberPlanek[i].move();
+    }
+
     this.annie.update(5);
 
     requestAnimationFrame(this.animate);
