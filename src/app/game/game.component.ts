@@ -9,6 +9,7 @@ import { Human } from '../human';
 import { Building } from '../bulding';
 import { Tree } from '../tree';
 import { Data } from '../Data';
+import { Tower } from '../tower';
 @Component({
   selector: 'app-game',
   templateUrl: './game.component.html',
@@ -46,6 +47,7 @@ export class GameComponent implements OnInit {
   islandImage = this.loader.load('assets/island.png');
   runnerTexture = this.loader.load('assets/run2.png');
   treeTexture = this.loader.load('assets/tree.png');
+  towerTexture = this.loader.load('assets/tower.png');
   buildTexture = 'assets/build2.png';
 
   raycaster = new THREE.Raycaster();
@@ -137,6 +139,10 @@ export class GameComponent implements OnInit {
       this.plane.add(this.trees[this.trees.length - 1]);
     }
 
+    const tower = new Tower(this.towerTexture);
+    this.plane.add(tower);
+    tower.position.x = -100;
+    tower.position.y = -100;
     this.scene.add(this.plane);
 
     this.vonalGeometry = new THREE.Geometry();
@@ -266,7 +272,7 @@ export class GameComponent implements OnInit {
             const angle = this.plane.rotation.z;
             vector.applyAxisAngle(axis, -angle);
 
-            if (Math.random() < 0.1) {
+            if (Math.random() < 1) {
               this.trees.push(new Tree(this.treeTexture));
               this.trees[this.trees.length - 1].position.x = vector.x + (Math.random() - 0.5) * 30;
               this.trees[this.trees.length - 1].position.y = vector.y + (Math.random() - 0.5) * 30;
