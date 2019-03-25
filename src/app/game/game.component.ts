@@ -82,8 +82,10 @@ export class GameComponent implements OnInit {
 
   bb; // menu buildings
   bb2;
+  fenti;
+  fenti2;
 
-  selected = false; // which is selected
+  selected = null; // which is selected
 
   lastBuild = +new Date();
 
@@ -229,6 +231,27 @@ export class GameComponent implements OnInit {
     this.bb2.done = true;
     this.bb2.visible = false;
 
+    this.fenti = new Building(this.loader.load(this.buildTexture));
+    this.scene.add(this.fenti);
+    this.fenti.position.x = 0;
+    this.fenti.position.y = 380;
+    this.fenti.position.z = -380;
+    this.fenti.update(2400);
+    this.fenti.update(1);
+    this.fenti.done = true;
+    this.fenti.visible = false;
+
+    this.fenti2 = new Building(this.loader.load(this.buildTexture), true);
+    this.scene.add(this.fenti2);
+    this.fenti2.position.x = 0;
+    this.fenti2.position.y = 380;
+    this.fenti2.position.z = -380;
+    this.fenti2.update(2400);
+    this.fenti2.update(1);
+    this.fenti2.done = true;
+    this.fenti2.visible = false;
+
+
 
     this.runnerTexture.minFilter = THREE.NearestFilter;
     this.runnerTexture.magFilter = THREE.NearestFilter;
@@ -246,10 +269,19 @@ export class GameComponent implements OnInit {
           this.bb2.visible = true;
         } else {
           if (this.bb.visible === true && this.bb2.visible === true) {
-            if (frame.hands[0].palmPosition[0] > 0) {
+            if (Math.abs(frame.hands[0].palmPosition[0]) > 50 && frame.hands[0].palmPosition[0] > 0) {
               this.selected = true;
-            } else {
+            } else if (Math.abs(frame.hands[0].palmPosition[0]) > 50) {
               this.selected = false;
+            } else {
+              this.selected = null;
+            }
+            if (this.selected != null) {
+              this.fenti.visible = !this.selected;
+              this.fenti2.visible = this.selected;
+            } else {
+              this.fenti.visible = false;
+              this.fenti2.visible = false;
             }
           }
 
@@ -327,7 +359,7 @@ export class GameComponent implements OnInit {
 
             const buildTime = +new Date();
 
-            if (buildTime - this.lastBuild > 1000) {
+            if (buildTime - this.lastBuild > 1000 && this.selected !== null) {
               this.lastBuild = buildTime;
               // this.stones.push(new Stone(this.stoneTexture));
               // this.stones[this.stones.length - 1].position.x =  + (Math.random() - 0.5) * 30;
