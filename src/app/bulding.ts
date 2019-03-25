@@ -5,7 +5,6 @@ export class Building extends THREE.Particle {
 
   textureAnimator;
   loader = new THREE.TextureLoader();
-  needsHuman = true;
   sum = 0;
   done = false;
   greenbuild = null;

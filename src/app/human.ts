@@ -23,7 +23,7 @@ export class Human extends THREE.Particle {
     const axis = new THREE.Vector3(0, 0, 1);
     this.position.applyAxisAngle(axis, Math.random() * Math.PI * 2);
     this.target = null;
-    this.targetCenter = new THREE.Vector3(0, 0, 0);
+    this.targetCenter = new THREE.Vector3(0, 100, 0);
   }
 
   move = () => {

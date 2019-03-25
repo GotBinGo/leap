@@ -7,6 +7,8 @@ import { Vector3 } from 'three';
 import { TextureAnimator } from '../texture-animation';
 import { Human } from '../human';
 import { Building } from '../bulding';
+import { Tree } from '../tree';
+import { Data } from '../Data';
 @Component({
   selector: 'app-game',
   templateUrl: './game.component.html',
@@ -43,6 +45,7 @@ export class GameComponent implements OnInit {
   particleImage = this.loader.load('assets/particle.png');
   islandImage = this.loader.load('assets/island.png');
   runnerTexture = this.loader.load('assets/run2.png');
+  treeTexture = this.loader.load('assets/tree.png');
   buildTexture = 'assets/build2.png';
 
   raycaster = new THREE.Raycaster();
@@ -64,6 +67,7 @@ export class GameComponent implements OnInit {
   vonalMaterial;
   annie;
   buildings = [];
+  trees = [];
 
   hand;
   hand2;
@@ -120,10 +124,18 @@ export class GameComponent implements OnInit {
 
     this.buildings.push(new Building(this.loader.load(this.buildTexture)));
     this.plane.add(this.buildings[0]);
-    this.buildings[0].position.y = -100;
+    this.buildings[0].position.y = 20;
+    this.buildings[0].position.x = 40;
     this.buildings.push(new Building(this.loader.load(this.buildTexture)));
     this.plane.add(this.buildings[1]);
-    this.buildings[1].position.y = 100;
+    this.buildings[1].position.y = 200;
+
+    for ( let i = 0; i < Data.trees.length; i++) {
+      this.trees.push(new Tree(this.treeTexture));
+      this.trees[this.trees.length - 1].position.x = Data.trees[i].x;
+      this.trees[this.trees.length - 1].position.y = Data.trees[i].y;
+      this.plane.add(this.trees[this.trees.length - 1]);
+    }
 
     this.scene.add(this.plane);
 
@@ -183,26 +195,25 @@ export class GameComponent implements OnInit {
       for (let i = 0; i < this.emberPlanek.length; i++) {
         this.emberPlanek[i].move();
       }
-
-      if (frame.hands.length > 0) {
+      if (frame.hands.length === 0) {
+        console.log(JSON.stringify(this.trees.map(x => ({x: x.position.x, y: x.position.y}))));
+      } else if (frame.hands.length > 0) {
         if (frame.hands[0].type === 'left') {
           this.hand.leapUpdate(frame.hands[0]);
 
         } else {
           this.hand2.leapUpdate(frame.hands[0]);
         }
-        if (frame.hands[0].pinchStrength > 0.9 || true) {
-          const inter = this.raycaster.intersectObject(this.plane, false);
-          if (inter.length) {
-            for (let i = 0; i < this.emberPlanek.length; i++) {
-              // let vector = new THREE.Vector3(inter[0].point.x, inter[0].point.z, 0);
-              const vector = new THREE.Vector3(inter[0].point.x, inter[0].point.z, 0);
-              const axis = new THREE.Vector3( 0, 0, 1 );
-              const angle = this.plane.rotation.z;
-              vector.applyAxisAngle(axis, -angle);
-              this.emberPlanek[i].setCenter(vector);
-              // this.emberPlanek[i].position.set(vector.x, vector.y, vector.z);
-            }
+        const inter = this.raycaster.intersectObject(this.plane, false);
+        if (inter.length) {
+          for (let i = 0; i < this.emberPlanek.length; i++) {
+            // let vector = new THREE.Vector3(inter[0].point.x, inter[0].point.z, 0);
+            const vector = new THREE.Vector3(inter[0].point.x, inter[0].point.z, 0);
+            const axis = new THREE.Vector3( 0, 0, 1 );
+            const angle = this.plane.rotation.z;
+            vector.applyAxisAngle(axis, -angle);
+            this.emberPlanek[i].setCenter(vector);
+            // this.emberPlanek[i].position.set(vector.x, vector.y, vector.z);
           }
         }
 
@@ -245,6 +256,23 @@ export class GameComponent implements OnInit {
           this.hand2.leapUpdate(frame.hands[1]);
         } else {
           this.hand.leapUpdate(frame.hands[1]);
+        }
+
+        if (frame.hands[1].pinchStrength > 0.99) {
+          const inter = this.raycaster.intersectObject(this.plane, false);
+          if (inter.length) {
+            const vector = new THREE.Vector3(inter[0].point.x, inter[0].point.z, 0);
+            const axis = new THREE.Vector3( 0, 0, 1 );
+            const angle = this.plane.rotation.z;
+            vector.applyAxisAngle(axis, -angle);
+
+            if (Math.random() < 0.1) {
+              this.trees.push(new Tree(this.treeTexture));
+              this.trees[this.trees.length - 1].position.x = vector.x + (Math.random() - 0.5) * 30;
+              this.trees[this.trees.length - 1].position.y = vector.y + (Math.random() - 0.5) * 30;
+              this.plane.add(this.trees[this.trees.length - 1]);
+            }
+          }
         }
       }
     });
