@@ -193,7 +193,7 @@ export class GameComponent implements OnInit {
     const runnerGeometry = new THREE.PlaneGeometry(50, 50, 1, 1);
     const runner = new THREE.Mesh(runnerGeometry, runnerMaterial);
     runner.position.set(0, 250, 0);
-    this.scene.add(runner);
+    // this.scene.add(runner);
 
 
     leap.loop((frame) => {
