@@ -208,8 +208,8 @@ export class GameComponent implements OnInit {
     this.hand.material = waterMat;
     this.hand2 = new Hand(handMat);
 
-    this.scene.add(this.hand);
-    this.scene.add(this.hand2);
+    // this.scene.add(this.hand);
+    // this.scene.add(this.hand2);
 
     this.bb = new Building(this.loader.load(this.buildTexture));
     this.scene.add(this.bb);
@@ -318,7 +318,7 @@ export class GameComponent implements OnInit {
         dx = a[0];
         dy = a[1];
         dz = a[2];
-        const norm = new THREE.Vector3(dx, dy, dz).normalize().multiplyScalar(1000);
+        const norm = new THREE.Vector3(dx, dy, dz).normalize().multiplyScalar(10);
 
         this.vonalGeometry.vertices[0].x = frame.hands[0].indexFinger.bones[3].nextJoint[0];
         this.vonalGeometry.vertices[0].y = frame.hands[0].indexFinger.bones[3].nextJoint[1];
