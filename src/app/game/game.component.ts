@@ -112,7 +112,7 @@ export class GameComponent implements OnInit {
     // const emberGeometry = new THREE.PlaneGeometry( 20, 25, 32);
     const emberMaterial = new THREE.SpriteMaterial( {alphaTest: 0.5, map: this.runnerTexture, side: THREE.DoubleSide});
 
-    for ( let i = 0; i < 2; i++) {
+    for ( let i = 0; i < 20; i++) {
       const emb = new Human(emberMaterial, this.buildings, this.plane.rotation);
       this.emberPlanek.push(emb);
       this.plane.add(emb);
